@@ -33,8 +33,8 @@
 <body>
 
     <div id="login-section">
-        <h2>関係者ログイン</h2>
-        <p>データ登録には「.ac.jp」ドメインの<br>Googleアカウントが必要です。</p>
+        <h2>資料登録者ログイン</h2>
+        <p>データ登録には許可されたドメインの<br>Googleアカウントが必要です。</p>
         <button class="google-btn" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="google-icon">
             Googleでログイン
@@ -182,7 +182,7 @@
                     document.getElementById('login-error').innerText = "";
                 } else {
                     document.getElementById('login-error').innerText = 
-                        `エラー: ${email} は許可されていません。\n${ALLOWED_DOMAIN} ドメインのアカウントでログインしてください。`;
+                        `エラー: ${email} は許可されていません。\n`;
                     logout();
                 }
             } else {
