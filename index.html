@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>データベース</title>
+    <style>
+        body {
+            font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
+            background-color: #f4f4f4;
+            color: #222;
+            margin: 0;
+            padding: 15px 30px;
+        }
+        
+        header { 
+            border-bottom: 2px solid #333;
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end; 
+        }
+        h1 { font-size: 24px; margin: 0; color: #000; }
+        
+        nav { font-size: 14px; font-weight: bold; }
+        nav a { margin-left: 20px; color: #333; text-decoration: none; }
+        nav a:hover { text-decoration: underline; }
+        .upload-btn { color: #0056b3; }
+
+        /* 検索パネル */
+        .search-panel {
+            background-color: #e8e8e8;
+            border: 1px solid #999;
+            padding: 20px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            border-radius: 4px;
+        }
+        .search-row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 15px; align-items: center; }
+        .search-item { display: flex; align-items: center; }
+        .search-item label { font-weight: bold; margin-right: 8px; color: #000; }
+        .search-item input, .search-item select {
+            padding: 6px;
+            border: 1px solid #777;
+            border-radius: 3px;
+            color: #000;
+        }
+        .search-item input[type="text"] { width: 160px; }
+
+        .search-actions { text-align: center; border-top: 1px solid #ccc; padding-top: 15px; margin-top: 10px; }
+        .btn-search { background-color: #444; color: #fff; border: none; padding: 8px 30px; cursor: pointer; font-weight: bold; border-radius: 3px; }
+        .btn-clear { background-color: #fff; color: #333; border: 1px solid #888; padding: 8px 20px; cursor: pointer; margin-left: 10px; border-radius: 3px; }
+        .btn-search:hover { background-color: #222; }
+
+        /* ハイライト */
+        .highlight-mark {
+            background-color: #ffeb3b;
+            color: #d00;
+            font-weight: bold;
+            padding: 0 2px;
+            border: 1px solid #eeb000;
+        }
+
+        /* 一覧表示エリア */
+        .total-count {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #000;
+            padding-left: 5px;
+            border-left: 4px solid #555;
+            line-height: 1.2;
+        }
+        .image-count-info { font-weight: normal; color: #444; margin-left: 10px; font-size: 0.9em; }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .grid-item {
+            background-color: #fff;
+            border: 1px solid #bbb;
+            padding: 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            height: 220px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .grid-item:hover {
+            border-color: #0056b3;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .grid-item a { text-decoration: none; color: inherit; display: flex; flex-direction: column; height: 100%; }
+        
+        .grid-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            border: 1px solid #ccc;
+            background-color: #fafafa;
+            margin-bottom: 8px;
+        }
+        
+        .grid-item .info {
+            flex-grow: 1;
+            overflow: hidden;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #222;
+            font-weight: 500;
+        }
+        
+        .grid-item .refno {
+            font-weight: bold;
+            color: #000;
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+        
+        .grid-item .title {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* ▼▼▼ 下部のページネーション装飾 ▼▼▼ */
+        .pagination { text-align: center; margin-top: 40px; padding: 20px 0; border-top: 1px solid #ddd; }
+        
+        .pagination button {
+            display: inline-block;
+            margin: 0 4px; /* ボタン同士の間隔 */
+            padding: 8px 14px; /* ボタンの大きさ */
+            background: #fff;
+            border: 1px solid #888;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            color: #333;
+            border-radius: 4px;
+            min-width: 40px; /* 最低限の幅 */
+        }
+        .pagination button:hover { background-color: #eee; border-color: #555; }
+        .pagination button.active { background: #333; color: #fff; border-color: #333; font-weight: bold; }
+        .pagination button:disabled { color: #ccc; border-color: #eee; cursor: default; }
+
+        .loading-msg { text-align: center; margin-top: 50px; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>データベース</h1>
+        <nav>
+            <a href="about.html">運営情報</a>
+            <a href="upload.html" target="_blank" class="upload-btn">＋ 新規データ登録</a>
+        </nav>
+    </header>
+
+    <div class="search-panel">
+        <div class="search-row">
+            <div class="search-item">
+                <label>キーワード</label>
+                <input type="text" id="s-keyword" placeholder="タイトル・地名">
+            </div>
+            <div class="search-item">
+                <label>整理番号</label>
+                <input type="text" id="s-ref" placeholder="例: 1-1">
+            </div>
+            <div class="search-item">
+                <label>使用状況</label>
+                <select id="s-usage">
+                    <option value="">全て</option>
+                    <option value="未使用">未使用</option>
+                    <option value="使用済み">使用済み</option>
+                </select>
+            </div>
+            <div class="search-item">
+                <label>刷色</label>
+                <select id="s-color">
+                    <option value="">全て</option>
+                    <option value="モノクロ">モノクロ</option>
+                    <option value="カラー">カラー</option>
+                    <option value="手彩色">手彩色</option>
+                </select>
+            </div>
+        </div>
+        <div class="search-actions">
+            <button class="btn-search" onclick="window.performSearch()">検索実行</button>
+            <button class="btn-clear" onclick="window.clearSearch()">クリア</button>
+        </div>
+    </div>
+
+    <main>
+        <div class="total-count" id="total-items-display">全0件</div>
+        
+        <div id="list-area" class="grid-container">
+            <p class="loading-msg">読み込み中...</p>
+        </div>
+        
+        <div class="pagination" id="pagination-bottom"></div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+      const firebaseConfig = {
+       apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
+       authDomain: "builderx-forik.firebaseapp.com",
+       projectId: "builderx-forik",
+       storageBucket: "builderx-forik.firebasestorage.app",
+       messagingSenderId: "704985970287",
+       appId: "1:704985970287:web:43924b7901b6f8f4df7f9a",
+    }; 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ★ 1ページあたりの表示数を50件に設定しました
+        const ITEMS_PER_PAGE = 50;
+        
+        let allData = [];
+        let filteredData = [];
+
+        async function loadData() {
+            const listArea = document.getElementById('list-area');
+            try {
+                const q = query(collection(db, "items"), orderBy("refNo"));
+                const querySnapshot = await getDocs(q);
+                
+                allData = [];
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    item.id = doc.id;
+                    // 検索用文字列作成
+                    const kws = Array.isArray(item.keywords) ? item.keywords.join(" ") : (item.keywords || "");
+                    item._searchStr = `${item.title_jp || ""} ${item.title_en || ""} ${kws} ${item.publisher_jp || ""}`.toLowerCase();
+                    allData.push(item);
+                });
+
+                filteredData = [...allData]; 
+                updateDisplay();
+
+            } catch (error) {
+                console.error(error);
+                listArea.innerHTML = '<p>読み込みエラー</p>';
+            }
+        }
+
+        window.performSearch = () => {
+            const kw = document.getElementById('s-keyword').value.trim().toLowerCase();
+            const ref = document.getElementById('s-ref').value.trim();
+            const usage = document.getElementById('s-usage').value;
+            const color = document.getElementById('s-color').value;
+
+            filteredData = allData.filter(item => {
+                let isMatch = true;
+                if (kw && !item._searchStr.includes(kw)) isMatch = false;
+                if (ref && (!item.refNo || !item.refNo.startsWith(ref))) isMatch = false;
+                if (usage && item.usage_status !== usage) isMatch = false;
+                if (color && item.print_color !== color) isMatch = false;
+                return isMatch;
+            });
+
+            updateDisplay();
+        };
+
+        window.clearSearch = () => {
+            document.getElementById('s-keyword').value = "";
+            document.getElementById('s-ref').value = "";
+            document.getElementById('s-usage').value = "";
+            document.getElementById('s-color').value = "";
+            filteredData = [...allData];
+            updateDisplay();
+        };
+
+        function updateDisplay() {
+            const totalDisplay = document.getElementById('total-items-display');
+            const listArea = document.getElementById('list-area');
+            const pagination = document.getElementById('pagination-bottom');
+
+            const hasImageCount = filteredData.filter(item => item.imageUrlFront || item.imageUrl).length;
+
+            totalDisplay.innerHTML = `
+                全${allData.length}件中、${filteredData.length}件ヒット 
+                <span class="image-count-info">(うち画像あり: ${hasImageCount}件)</span>
+            `;
+
+            if (filteredData.length === 0) {
+                listArea.innerHTML = '<p style="padding:20px; text-align:center;">条件に一致するデータがありません。</p>';
+                pagination.innerHTML = "";
+                return;
+            }
+            
+            // 検索後は必ず1ページ目に戻る
+            showPage(1);
+        }
+
+        function highlightText(text, searchStr) {
+            if (!text) return "";
+            if (!searchStr) return text;
+            const regex = new RegExp(`(${searchStr})`, 'gi');
+            return text.replace(regex, '<span class="highlight-mark">$1</span>');
+        }
+
+        function showPage(pageNumber) {
+            const listArea = document.getElementById('list-area');
+            listArea.innerHTML = "";
+
+            const start = (pageNumber - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageData = filteredData.slice(start, end);
+
+            const currentKw = document.getElementById('s-keyword').value.trim();
+            const currentRef = document.getElementById('s-ref').value.trim();
+
+            pageData.forEach(item => {
+                const imgFront = item.imageUrlFront || item.imageUrl || 'https://placehold.jp/120x90.png?text=NoImage';
+                const rawTitle = item.title_jp || item.title || 'タイトルなし';
+                const rawRef = item.refNo || '-';
+
+                const displayTitle = highlightText(rawTitle, currentKw);
+                const displayRef = highlightText(rawRef, currentRef);
+
+                const html = `
+                    <div class="grid-item">
+                        <a href="detail.html?id=${item.id}">
+                            <img src="${imgFront}" alt="画像">
+                            <div class="info">
+                                <span class="refno">${displayRef}</span>
+                                <span class="title">${displayTitle}</span>
+                            </div>
+                        </a>
+                    </div>
+                `;
+                listArea.innerHTML += html;
+            });
+
+            updatePaginationButtons(pageNumber);
+            window.scrollTo(0, 0);
+        }
+
+        function updatePaginationButtons(currentPage) {
+            const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+            const pagination = document.getElementById('pagination-bottom');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = "";
+                return;
+            }
+
+            let buttonsHtml = "";
+            
+            // 表示するボタンの範囲を計算（現在のページの前後に数ページ分だけ出す）
+            const maxButtons = 8;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            if (endPage - startPage + 1 < maxButtons) startPage = Math.max(1, endPage - maxButtons + 1);
+
+            // [最初] ボタン
+            if (currentPage > 1) {
+                buttonsHtml += `<button onclick="window.changePage(1)">最初</button>`;
+            }
+            
+            // 数字ボタン
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = (i === currentPage) ? "active" : "";
+                buttonsHtml += `<button onclick="window.changePage(${i})" class="${activeClass}">${i}</button>`;
+            }
+
+            // [最後] ボタン
+            if (currentPage < totalPages) {
+                buttonsHtml += `<button onclick="window.changePage(${totalPages})">最後</button>`;
+            }
+
+            pagination.innerHTML = buttonsHtml;
+        }
+
+        window.changePage = (page) => showPage(page);
+        loadData();
+    </script>
+</body>
+</html>

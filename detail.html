@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>詳細情報 | 朝鮮写真絵はがきDB</title>
+    <style>
+        body { font-family: "Yu Mincho", "YuMincho", serif; background-color: #f9f9f9; margin: 0; padding: 20px; color: #333; }
+        header { border-bottom: 2px solid #555; margin-bottom: 20px; padding-bottom: 10px; }
+        h1 { font-size: 20px; margin: 0; }
+        a { color: #0056b3; text-decoration: none; }
+        
+        /* メインレイアウト */
+        .container { display: flex; background: #fff; border: 1px solid #ccc; min-height: 600px; }
+        
+        /* 左カラム（画像） */
+        .image-section { flex: 1; padding: 20px; border-right: 1px solid #ddd; text-align: center; background-color: #fcfcfc; }
+        .image-box { margin-bottom: 30px; }
+        .image-label { font-weight: bold; margin-bottom: 10px; display: block; font-size: 16px; }
+        .main-img { max-width: 90%; max-height: 400px; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); cursor: zoom-in; transition: transform 0.2s; }
+        .main-img:hover { transform: scale(1.02); }
+
+        /* 右カラム（情報＋関連データ） */
+        .info-section { flex: 1; padding: 0; display: flex; flex-direction: column; }
+        
+        .section-title { background-color: #eee; padding: 10px; text-align: center; font-weight: bold; border-bottom: 1px solid #ddd; margin: 0; }
+        
+        .info-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .info-table th { width: 30%; padding: 10px; text-align: right; border-bottom: 1px solid #eee; border-right: 1px solid #eee; font-weight: normal; color: #555; vertical-align: top; background: #fafafa; }
+        .info-table td { width: 70%; padding: 10px 15px; border-bottom: 1px solid #eee; vertical-align: top; line-height: 1.6; }
+        .tag { color: #0056b3; margin-right: 8px; cursor: pointer; text-decoration: underline; }
+
+        /* ▼▼▼ 関連データエリアのデザイン ▼▼▼ */
+        .related-area {
+            padding: 20px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            margin-top: auto; /* テーブルの下の余白を埋めるように配置 */
+        }
+        .related-title {
+            font-size: 16px; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 15px; color: #555;
+        }
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+        .related-item {
+            border: 1px solid #eee;
+            padding: 5px;
+            text-align: center;
+            font-size: 11px;
+            transition: opacity 0.2s;
+        }
+        .related-item:hover { opacity: 0.8; border-color: #ccc; }
+        .related-item img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            background: #eee;
+            margin-bottom: 3px;
+        }
+        .related-item a { color: #333; display: block; text-decoration: none; }
+
+        /* モーダル等はそのまま */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); overflow: hidden; }
+        .modal-content-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; cursor: grab; }
+        .modal-content-wrapper:active { cursor: grabbing; }
+        .modal img { max-width: 90%; max-height: 90%; transition: transform 0.05s linear; user-select: none; pointer-events: none; }
+        .modal-controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1001; background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 30px; }
+        .control-btn { background: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; }
+        .control-btn:hover { background: #eee; }
+        .close-btn { position: fixed; top: 20px; right: 30px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001; }
+
+        @media (max-width: 768px) { .container { flex-direction: column; } .image-section { border-right: none; border-bottom: 1px solid #ddd; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="back-link">← 一覧に戻る</a>
+        <h1 style="margin-top:5px;">詳細データ表示</h1>
+    </header>
+
+    <div class="container">
+        <div class="image-section">
+            <div class="section-title" style="background:none; border:none; margin-bottom:20px;">画像</div>
+            <div class="image-box">
+                <span class="image-label">表</span>
+                <img id="img-front" src="" alt="表面画像" class="main-img" onclick="openViewer(this.src)">
+            </div>
+            <div class="image-box" id="box-back" style="display:none;">
+                <span class="image-label">裏</span>
+                <img id="img-back" src="" alt="裏面画像" class="main-img" onclick="openViewer(this.src)">
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-title">書誌情報</div>
+            <table class="info-table">
+                <tr><th>和文タイトル</th><td id="val-title-jp">-</td></tr>
+                <tr><th>英文タイトル</th><td id="val-title-en">-</td></tr>
+                <tr><th>整理番号</th><td id="val-ref">-</td></tr>
+                <tr><th>形態</th><td id="val-form">-</td></tr>
+                <tr><th>発行(和文)</th><td id="val-pub-jp">-</td></tr>
+                <tr><th>発行(英文)</th><td id="val-pub-en">-</td></tr>
+                <tr><th>使用/未使用</th><td id="val-usage">-</td></tr>
+                <tr><th>消印日時</th><td id="val-postmark">-</td></tr>
+                <tr><th>仕切り線位置</th><td id="val-divider">-</td></tr>
+                <tr><th>刷色</th><td id="val-color">-</td></tr>
+                <tr><th>備考</th><td id="val-remarks">-</td></tr>
+                <tr><th>キーワード</th><td id="val-keywords">-</td></tr>
+            </table>
+
+            <div class="related-area">
+                <div class="related-title">関連データ</div>
+                <div id="related-list" class="related-grid">
+                    <p style="color:#999; font-size:12px;">関連データを読み込み中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal">
+        <span class="close-btn" onclick="closeViewer()">&times;</span>
+        <div class="modal-content-wrapper" id="dragArea">
+            <img id="modalImg" src="" draggable="false">
+        </div>
+        <div class="modal-controls">
+            <button class="control-btn" onclick="zoomOut()">－</button>
+            <button class="control-btn" onclick="resetZoom()">↺</button>
+            <button class="control-btn" onclick="zoomIn()">＋</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+ const firebaseConfig = {
+       apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
+       authDomain: "builderx-forik.firebaseapp.com",
+       projectId: "builderx-forik",
+       storageBucket: "builderx-forik.firebasestorage.app",
+       messagingSenderId: "704985970287",
+       appId: "1:704985970287:web:43924b7901b6f8f4df7f9a",
+    }; 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const params = new URLSearchParams(window.location.search);
+        const docId = params.get('id');
+
+        async function loadDetail() {
+            if (!docId) return;
+            try {
+                const docRef = doc(db, "items", docId);
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    renderData(data);
+                    // 関連データを読み込む
+                    loadRelatedItems(data);
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        function renderData(data) {
+            const imgFront = document.getElementById('img-front');
+            imgFront.src = data.imageUrlFront || data.imageUrl || "https://placehold.jp/300x200.png?text=NoImage";
+            if (data.imageUrlBack) {
+                document.getElementById('img-back').src = data.imageUrlBack;
+                document.getElementById('box-back').style.display = "block";
+            }
+            setText('val-title-jp', data.title_jp || data.title);
+            setText('val-title-en', data.title_en);
+            setText('val-ref', data.refNo);
+            setText('val-form', data.form_type);
+            setText('val-pub-jp', data.publisher_jp);
+            setText('val-pub-en', data.publisher_en);
+            setText('val-usage', data.usage_status);
+            setText('val-postmark', data.postmark_date);
+            setText('val-divider', data.divider_loc);
+            setText('val-color', data.print_color);
+            setText('val-remarks', data.remarks);
+            const keywordsDiv = document.getElementById('val-keywords');
+            if (Array.isArray(data.keywords) && data.keywords.length > 0) {
+                keywordsDiv.innerHTML = data.keywords.map(k => `<span class="tag">${k}</span>`).join(" ");
+            } else {
+                keywordsDiv.innerText = data.keywords || "-";
+            }
+        }
+
+        function setText(id, text) { document.getElementById(id).innerText = text || "-"; }
+
+        // ★関連データを取得して表示する関数
+        async function loadRelatedItems(currentItem) {
+            const relatedList = document.getElementById('related-list');
+            relatedList.innerHTML = "";
+
+            try {
+                let q;
+                // キーワードがあれば、そのキーワードを含むデータを最大6件探す
+                if (currentItem.keywords && currentItem.keywords.length > 0) {
+                    // array-contains-any は最大10個まで指定可能
+                    const searchKeywords = currentItem.keywords.slice(0, 10);
+                    q = query(
+                        collection(db, "items"),
+                        where("keywords", "array-contains-any", searchKeywords),
+                        limit(7) // 自分自身が含まれる可能性があるので少し多めに
+                    );
+                } else {
+                    // キーワードがない場合は適当に最新のデータを表示
+                    q = query(collection(db, "items"), limit(6));
+                }
+
+                const querySnapshot = await getDocs(q);
+                let count = 0;
+
+                querySnapshot.forEach((doc) => {
+                    // 自分自身は表示しない & 最大6件まで
+                    if (doc.id !== docId && count < 6) {
+                        const item = doc.data();
+                        const title = item.title_jp || item.title || "タイトルなし";
+                        const img = item.imageUrlFront || item.imageUrl || "https://placehold.jp/100x70.png?text=NoImage";
+                        
+                        const html = `
+                            <div class="related-item">
+                                <a href="detail.html?id=${doc.id}">
+                                    <img src="${img}" alt="${title}">
+                                    <div>${item.refNo || ""}</div>
+                                    <div style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">${title}</div>
+                                </a>
+                            </div>
+                        `;
+                        relatedList.innerHTML += html;
+                        count++;
+                    }
+                });
+
+                if (count === 0) {
+                    relatedList.innerHTML = '<p style="color:#999; font-size:12px;">関連データはありません。</p>';
+                }
+
+            } catch (e) {
+                console.error("関連データ取得エラー:", e);
+                relatedList.innerHTML = '<p style="color:#999;">読み込みエラー</p>';
+            }
+        }
+
+        // --- 画像操作ロジック ---
+        let currentScale = 1; let currentX = 0; let currentY = 0; let isDragging = false; let startX = 0; let startY = 0;
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
+        const dragArea = document.getElementById('dragArea');
+
+        window.openViewer = (src) => { modal.style.display = "block"; modalImg.src = src; resetZoom(); };
+        window.closeViewer = () => { modal.style.display = "none"; };
+        function updateTransform() { modalImg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`; }
+        window.zoomIn = () => { currentScale += 0.2; updateTransform(); };
+        window.zoomOut = () => { if (currentScale > 0.4) { currentScale -= 0.2; updateTransform(); } };
+        window.resetZoom = () => { currentScale = 1; currentX = 0; currentY = 0; updateTransform(); };
+        
+        dragArea.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY < 0) window.zoomIn(); else window.zoomOut(); });
+        dragArea.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; startX = e.clientX - currentX; startY = e.clientY - currentY; dragArea.style.cursor = "grabbing"; });
+        window.addEventListener('mousemove', (e) => { if (!isDragging) return; e.preventDefault(); currentX = e.clientX - startX; currentY = e.clientY - startY; updateTransform(); });
+        window.addEventListener('mouseup', () => { if (isDragging) { isDragging = false; dragArea.style.cursor = "grab"; } });
+
+        loadDetail();
+    </script>
+</body>
+</html>
