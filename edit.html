@@ -181,7 +181,10 @@
         });
 
         // 認証チェック
-        const ALLOWED_DOMAIN = "ac.jp"; 
+        const ALLOWED_DOMAINS = [
+            "wesleyan.ac.jp", 
+            
+        ]; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
