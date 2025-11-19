@@ -33,7 +33,7 @@
 <body>
 
     <div id="login-section">
-        <h2>関係者ログイン</h2>
+        <h2>資料登録者ログイン</h2>
         <p>データ登録には許可されたドメインの<br>Googleアカウントが必要です。</p>
         <button class="google-btn" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="google-icon">
@@ -125,7 +125,7 @@
 
             <label>キーワード (スペース区切りで入力)</label>
             <input type="text" id="keywords" placeholder="例: 人物あり 昌徳宮 1930年">
-            <span class="input-note" style="color:#666; margin-top:-8px;">※空白を入れると自動で区切られます（カンマ不要）</span>
+            <span class="input-note" style="color:#666; margin-top:-8px;">※空白を入れると自動で区切られます</span>
 
             <div style="background:#f9f9f9; padding:15px; margin-top:15px; border:1px dashed #ccc;">
                 <label>【表面】画像 (必須)</label> <input type="file" id="imageFileFront" accept="image/*" required>
@@ -145,7 +145,7 @@
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-      const firebaseConfig = {
+          const firebaseConfig = {
        apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
        authDomain: "builderx-forik.firebaseapp.com",
        projectId: "builderx-forik",
@@ -159,22 +159,20 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // 整理番号の入力制限
         const refInput = document.getElementById('refNo');
         refInput.addEventListener('input', (e) => {
             const val = e.target.value;
-            const halfVal = val.replace(/[０-９]/g, (s) => {
-                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
-            });
+            const halfVal = val.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
             e.target.value = halfVal.replace(/[^0-9-]/g, '');
         });
 
-        // ドメイン制限
+        
         const ALLOWED_DOMAIN = "ac.jp"; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 const email = user.email;
+                // メアドが ac.jp で終わっているかチェック
                 if (email.endsWith(ALLOWED_DOMAIN)) {
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('upload-section').style.display = 'block';
@@ -182,7 +180,7 @@
                     document.getElementById('login-error').innerText = "";
                 } else {
                     document.getElementById('login-error').innerText = 
-                        `エラー: ${email} は許可されていません。\n `;
+                        `エラー: ${email} は許可されていません。\n`;
                     logout();
                 }
             } else {
@@ -194,7 +192,7 @@
         window.loginWithGoogle = () => {
             signInWithPopup(auth, provider).catch((error) => {
                 console.error(error);
-                document.getElementById('login-error').innerText = "ログインに失敗しました。";
+                document.getElementById('login-error').innerText = "ログインに失敗しました: " + error.message;
             });
         };
 
@@ -229,10 +227,7 @@
                 }
 
                 status.innerText = "DB登録中...";
-                
-                // ★キーワード処理の改善部分
                 const keywordsStr = document.getElementById('keywords').value;
-                // 全角/半角スペース、カンマ、読点などで区切る正規表現
                 const keywordArray = keywordsStr.split(/[,、\s　]+/).filter(k => k);
 
                 await addDoc(collection(db, "items"), {
