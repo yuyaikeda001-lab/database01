@@ -13,29 +13,58 @@
         /* メインレイアウト */
         .container { display: flex; background: #fff; border: 1px solid #ccc; min-height: 600px; }
         
-        /* 左カラム（画像） */
-        .image-section { flex: 1; padding: 20px; border-right: 1px solid #ddd; text-align: center; background-color: #fcfcfc; }
-        .image-box { margin-bottom: 30px; }
-        .image-label { font-weight: bold; margin-bottom: 10px; display: block; font-size: 16px; }
-        .main-img { max-width: 90%; max-height: 400px; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); cursor: zoom-in; transition: transform 0.2s; }
+        /* 左カラム（画像セクション） */
+        .image-section { 
+            flex: 1; 
+            padding: 20px 10px; /* 左右のパディングを少し減らして画像を大きく表示しやすく */
+            border-right: 1px solid #ddd; 
+            background-color: #fcfcfc; 
+        }
+        .section-title { background-color: #eee; padding: 10px; text-align: center; font-weight: bold; border-bottom: 1px solid #ddd; margin: 0; }
+        
+        /* ▼▼▼ 画像横並び用グリッドレイアウト ▼▼▼ */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 10px; /* 画像間の隙間を少し詰める */
+            padding-top: 20px; 
+            padding-bottom: 20px;
+            place-items: center; 
+        }
+        .image-box {
+            text-align: center;
+            width: 100%; 
+            max-width: 300px; /* 個々の画像の最大幅を少し広げる */
+        }
+        .image-label { font-weight: bold; margin-bottom: 10px; display: block; font-size: 16px; color: #555; }
+        .main-img { 
+            max-width: 100%; 
+            max-height: 380px; /* ★ここを250pxから380pxに引き上げました★ */
+            border: 1px solid #ccc; 
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1); 
+            cursor: zoom-in; 
+            transition: transform 0.2s;
+            object-fit: contain; 
+            background-color: #fff; 
+        }
         .main-img:hover { transform: scale(1.02); }
 
         /* 右カラム（情報＋関連データ） */
         .info-section { flex: 1; padding: 0; display: flex; flex-direction: column; }
-        
-        .section-title { background-color: #eee; padding: 10px; text-align: center; font-weight: bold; border-bottom: 1px solid #ddd; margin: 0; }
         
         .info-table { width: 100%; border-collapse: collapse; font-size: 14px; }
         .info-table th { width: 30%; padding: 10px; text-align: right; border-bottom: 1px solid #eee; border-right: 1px solid #eee; font-weight: normal; color: #555; vertical-align: top; background: #fafafa; }
         .info-table td { width: 70%; padding: 10px 15px; border-bottom: 1px solid #eee; vertical-align: top; line-height: 1.6; }
         .tag { color: #0056b3; margin-right: 8px; cursor: pointer; text-decoration: underline; }
 
-        /* ▼▼▼ 関連データエリアのデザイン ▼▼▼ */
+        /* ▼▼▼ 関連データエリアのデザイン (書誌情報に続くように調整) ▼▼▼ */
         .related-area {
             padding: 20px;
             background-color: #fff;
-            border-top: 1px solid #ddd;
-            margin-top: auto; /* テーブルの下の余白を埋めるように配置 */
+            border-top: 1px solid #ddd; 
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
         }
         .related-title {
             font-size: 16px; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 15px; color: #555;
@@ -44,6 +73,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 10px;
+            flex-grow: 1; 
         }
         .related-item {
             border: 1px solid #eee;
@@ -72,7 +102,11 @@
         .control-btn:hover { background: #eee; }
         .close-btn { position: fixed; top: 20px; right: 30px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001; }
 
-        @media (max-width: 768px) { .container { flex-direction: column; } .image-section { border-right: none; border-bottom: 1px solid #ddd; } }
+        @media (max-width: 768px) { 
+            .container { flex-direction: column; } 
+            .image-section { border-right: none; border-bottom: 1px solid #ddd; padding: 20px; } /* スマホでのパディングを標準に戻す */
+            .image-grid { grid-template-columns: 1fr; } 
+        }
     </style>
 </head>
 <body>
@@ -84,14 +118,16 @@
 
     <div class="container">
         <div class="image-section">
-            <div class="section-title" style="background:none; border:none; margin-bottom:20px;">画像</div>
-            <div class="image-box">
-                <span class="image-label">表</span>
-                <img id="img-front" src="" alt="表面画像" class="main-img" onclick="openViewer(this.src)">
-            </div>
-            <div class="image-box" id="box-back" style="display:none;">
-                <span class="image-label">裏</span>
-                <img id="img-back" src="" alt="裏面画像" class="main-img" onclick="openViewer(this.src)">
+            <div class="section-title">画像</div>
+            <div class="image-grid">
+                <div class="image-box">
+                    <span class="image-label">表</span>
+                    <img id="img-front" src="" alt="表面画像" class="main-img" onclick="openViewer(this.src)">
+                </div>
+                <div class="image-box" id="box-back" style="display:none;">
+                    <span class="image-label">裏</span>
+                    <img id="img-back" src="" alt="裏面画像" class="main-img" onclick="openViewer(this.src)">
+                </div>
             </div>
         </div>
 
@@ -113,7 +149,7 @@
             </table>
 
             <div class="related-area">
-                <div class="related-title">関連データ</div>
+                <div class="related-title">関連データ（キーワード一致など）</div>
                 <div id="related-list" class="related-grid">
                     <p style="color:#999; font-size:12px;">関連データを読み込み中...</p>
                 </div>
@@ -136,7 +172,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
- const firebaseConfig = {
+
+        const firebaseConfig = {
        apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
        authDomain: "builderx-forik.firebaseapp.com",
        projectId: "builderx-forik",
@@ -158,19 +195,24 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     renderData(data);
-                    // 関連データを読み込む
                     loadRelatedItems(data);
+                } else {
+                    document.getElementById('val-title-jp').innerText = 'データが見つかりません。';
                 }
             } catch (error) { console.error(error); }
         }
 
         function renderData(data) {
             const imgFront = document.getElementById('img-front');
-            imgFront.src = data.imageUrlFront || data.imageUrl || "https://placehold.jp/300x200.png?text=NoImage";
+            imgFront.src = data.imageUrlFront || "https://placehold.jp/300x200.png?text=NoImage";
+            
             if (data.imageUrlBack) {
                 document.getElementById('img-back').src = data.imageUrlBack;
                 document.getElementById('box-back').style.display = "block";
+            } else {
+                document.getElementById('box-back').style.display = "none";
             }
+
             setText('val-title-jp', data.title_jp || data.title);
             setText('val-title-en', data.title_en);
             setText('val-ref', data.refNo);
@@ -192,24 +234,20 @@
 
         function setText(id, text) { document.getElementById(id).innerText = text || "-"; }
 
-        // ★関連データを取得して表示する関数
         async function loadRelatedItems(currentItem) {
             const relatedList = document.getElementById('related-list');
             relatedList.innerHTML = "";
 
             try {
                 let q;
-                // キーワードがあれば、そのキーワードを含むデータを最大6件探す
                 if (currentItem.keywords && currentItem.keywords.length > 0) {
-                    // array-contains-any は最大10個まで指定可能
                     const searchKeywords = currentItem.keywords.slice(0, 10);
                     q = query(
                         collection(db, "items"),
                         where("keywords", "array-contains-any", searchKeywords),
-                        limit(7) // 自分自身が含まれる可能性があるので少し多めに
+                        limit(7) 
                     );
                 } else {
-                    // キーワードがない場合は適当に最新のデータを表示
                     q = query(collection(db, "items"), limit(6));
                 }
 
@@ -217,7 +255,6 @@
                 let count = 0;
 
                 querySnapshot.forEach((doc) => {
-                    // 自分自身は表示しない & 最大6件まで
                     if (doc.id !== docId && count < 6) {
                         const item = doc.data();
                         const title = item.title_jp || item.title || "タイトルなし";
