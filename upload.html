@@ -33,7 +33,7 @@
 <body>
 
     <div id="login-section">
-        <h2>資料登録者ログイン</h2>
+        <h2>関係者ログイン</h2>
         <p>データ登録には許可されたドメインの<br>Googleアカウントが必要です。</p>
         <button class="google-btn" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="google-icon">
@@ -145,7 +145,7 @@
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-         const firebaseConfig = {
+      const firebaseConfig = {
        apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
        authDomain: "builderx-forik.firebaseapp.com",
        projectId: "builderx-forik",
@@ -170,10 +170,7 @@
         });
 
         // ドメイン制限
-        const ALLOWED_DOMAINS = [
-            "wesleyan.ac.jp", 
-            
-        ];
+        const ALLOWED_DOMAIN = "ac.jp"; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -185,7 +182,7 @@
                     document.getElementById('login-error').innerText = "";
                 } else {
                     document.getElementById('login-error').innerText = 
-                        `エラー: ${email} は許可されていません。\n`;
+                        `エラー: ${email} は許可されていません。\n `;
                     logout();
                 }
             } else {

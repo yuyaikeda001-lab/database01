@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>データ編集 </title>
+    <title>データ編集 | 関係者専用</title>
     <style>
         body { font-family: "Yu Mincho", serif; background-color: #f0f0f0; padding: 20px; color: #333; }
         .form-container { background: white; padding: 30px; border: 1px solid #ccc; max-width: 700px; margin: 0 auto; }
@@ -37,7 +37,7 @@
 <body>
 
     <div id="login-section">
-        <h2>資料登録者ログイン (編集)</h2>
+        <h2>関係者ログイン (編集)</h2>
         <p>データの修正には許可されたドメインの<br>Googleアカウントが必要です。</p>
         <button class="google-btn" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="google-icon">
@@ -154,7 +154,7 @@
         import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-     const firebaseConfig = {
+    const firebaseConfig = {
        apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
        authDomain: "builderx-forik.firebaseapp.com",
        projectId: "builderx-forik",
@@ -181,10 +181,7 @@
         });
 
         // 認証チェック
-        const ALLOWED_DOMAINS = [
-            "wesleyan.ac.jp", 
-            
-        ]; 
+        const ALLOWED_DOMAIN = "ac.jp"; 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
