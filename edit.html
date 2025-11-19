@@ -19,9 +19,15 @@
         .google-btn:hover { background-color: #f8f8f8; }
         .google-icon { width: 18px; height: 18px; margin-right: 10px; }
 
-        /* 保存ボタンは色を変えて区別 */
-        button.submit-btn { background-color: #d9534f; color: white; padding: 12px; border: none; cursor: pointer; font-size: 16px; width: 100%; margin-top: 20px; }
-        button.submit-btn:hover { background-color: #c9302c; }
+        button.submit-btn { background-color: #0056b3; color: white; padding: 12px; border: none; cursor: pointer; font-size: 16px; width: 100%; margin-top: 20px; }
+        button.submit-btn:hover { background-color: #004494; }
+
+        /* 削除ボタンのデザイン（赤色） */
+        button.delete-btn { 
+            background-color: #d9534f; color: white; padding: 10px; border: none; cursor: pointer; font-size: 14px; width: 100%; margin-top: 40px; 
+            border-radius: 4px; opacity: 0.8;
+        }
+        button.delete-btn:hover { background-color: #c9302c; opacity: 1; }
 
         #login-section { text-align: center; max-width: 400px; margin: 50px auto; background: #fff; padding: 40px; border: 1px solid #ccc; }
         #edit-section { display: none; }
@@ -30,14 +36,13 @@
         .logout-btn { background-color: #666; font-size: 12px; padding: 5px 10px; color: #fff; border: none; cursor: pointer; float: right; }
         .input-note { font-size: 11px; color: #d00; margin-top: -8px; margin-bottom: 10px; display: block; }
 
-        /* 現在の画像表示用 */
         .current-img { width: 100px; height: auto; border: 1px solid #ccc; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
 
     <div id="login-section">
-        <h2>資料登録者ログイン (編集)</h2>
+        <h2>資料管理者ログイン (編集)</h2>
         <p>データの修正には許可されたドメインの<br>Googleアカウントが必要です。</p>
         <button class="google-btn" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="google-icon">
@@ -52,7 +57,7 @@
             <button class="logout-btn" onclick="logout()">ログアウト</button>
             <h1 style="margin-top:0;">データ編集・修正</h1>
         </div>
-        <p style="font-size:12px; color:#d9534f;">※内容を書き換えて「更新保存」を押してください。</p>
+        <p style="font-size:12px; color:#0056b3;">※内容を書き換えて「更新保存」を押してください。</p>
 
         <form id="editForm">
             <div style="display:flex; gap:20px;">
@@ -130,19 +135,19 @@
             <label>キーワード (スペース区切り)</label>
             <input type="text" id="keywords">
 
-            <div style="background:#fff5f5; padding:15px; margin-top:15px; border:1px dashed #d9534f;">
+            <div style="background:#f9f9f9; padding:15px; margin-top:15px; border:1px dashed #ccc;">
                 <p style="font-size:12px; margin:0 0 10px 0; font-weight:bold;">画像を差し替える場合のみ選択してください</p>
-                
                 <label>【表面】画像</label>
                 <img id="preview-front" class="current-img" src="">
                 <input type="file" id="imageFileFront" accept="image/*">
-                
                 <label>【裏面】画像</label>
                 <img id="preview-back" class="current-img" src="">
                 <input type="file" id="imageFileBack" accept="image/*">
             </div>
 
             <button type="submit" id="submitBtn" class="submit-btn">更新内容を保存する</button>
+            
+            <button type="button" id="deleteBtn" class="delete-btn">このデータを完全に削除する</button>
         </form>
         
         <div id="status" style="margin-top:15px; color:#d9534f; font-weight:bold;"></div>
@@ -151,10 +156,13 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+        // deleteDocを追加
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        // deleteObjectを追加
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-    const firebaseConfig = {
+
+             const firebaseConfig = {
        apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
        authDomain: "builderx-forik.firebaseapp.com",
        projectId: "builderx-forik",
@@ -168,7 +176,6 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // URLからIDを取得
         const params = new URLSearchParams(window.location.search);
         const docId = params.get('id');
 
@@ -180,8 +187,10 @@
             e.target.value = halfVal.replace(/[^0-9-]/g, '');
         });
 
-        // 認証チェック
         const ALLOWED_DOMAIN = "ac.jp"; 
+        
+        // 削除時に画像のURLが必要なので、読み込み時に保存しておく変数
+        let currentData = null;
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -189,7 +198,6 @@
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('edit-section').style.display = 'block';
                     document.getElementById('login-error').innerText = "";
-                    // ログインできたらデータを読み込む
                     loadDataForEdit();
                 } else {
                     document.getElementById('login-error').innerText = `エラー: ${user.email} は許可されていません。`;
@@ -210,18 +218,15 @@
 
         window.logout = () => { signOut(auth); };
 
-        // ★既存データを読み込んでフォームに入れる関数
         async function loadDataForEdit() {
             if(!docId) { alert("エラー: IDが指定されていません"); return; }
-
             try {
                 const docRef = doc(db, "items", docId);
                 const docSnap = await getDoc(docRef);
-
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    currentData = data; // 削除用にデータを保持
 
-                    // 各フィールドに値をセット
                     setValue('refNo', data.refNo);
                     setValue('form_type', data.form_type);
                     setValue('title_jp', data.title_jp);
@@ -233,30 +238,18 @@
                     setValue('divider_loc', data.divider_loc);
                     setValue('print_color', data.print_color);
                     setValue('remarks', data.remarks);
-
-                    // キーワードは配列からスペース区切り文字列に戻す
                     if(Array.isArray(data.keywords)){
                         document.getElementById('keywords').value = data.keywords.join(" ");
                     }
-
-                    // 画像プレビュー
                     if(data.imageUrlFront) document.getElementById('preview-front').src = data.imageUrlFront;
                     if(data.imageUrlBack) document.getElementById('preview-back').src = data.imageUrlBack;
-
-                } else {
-                    alert("データが見つかりません");
-                }
-            } catch(e) {
-                console.error(e);
-                alert("読み込みエラー");
-            }
+                } else { alert("データが見つかりません"); }
+            } catch(e) { console.error(e); alert("読み込みエラー"); }
         }
 
-        function setValue(id, val) {
-            if(val) document.getElementById(id).value = val;
-        }
+        function setValue(id, val) { if(val) document.getElementById(id).value = val; }
 
-        // ★更新処理
+        // 更新処理
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
@@ -271,7 +264,6 @@
                 const fileFront = document.getElementById('imageFileFront').files[0];
                 const fileBack = document.getElementById('imageFileBack').files[0];
 
-                // 更新用のデータオブジェクト
                 const updateData = {
                     refNo: document.getElementById('refNo').value,
                     form_type: document.getElementById('form_type').value,
@@ -284,21 +276,18 @@
                     divider_loc: document.getElementById('divider_loc').value,
                     print_color: document.getElementById('print_color').value,
                     remarks: document.getElementById('remarks').value,
-                    updatedAt: serverTimestamp(), // 更新日時
+                    updatedAt: serverTimestamp(),
                     lastEditor: auth.currentUser.email
                 };
 
-                // キーワードの処理
                 const keywordsStr = document.getElementById('keywords').value;
                 updateData.keywords = keywordsStr.split(/[,、\s　]+/).filter(k => k);
 
-                // 画像に変更がある場合のみアップロードしてURLを更新
                 if (fileFront) {
                     const refFront = ref(storage, "images/" + Date.now() + "_front_" + fileFront.name);
                     await uploadBytes(refFront, fileFront);
                     updateData.imageUrlFront = await getDownloadURL(refFront);
                 }
-
                 if (fileBack) {
                     const refBack = ref(storage, "images/" + Date.now() + "_back_" + fileBack.name);
                     await uploadBytes(refBack, fileBack);
@@ -306,23 +295,52 @@
                 }
 
                 status.innerText = "データベース更新中...";
-
-                // Firestoreを更新 (updateDocを使うと、指定した項目だけ書き換わります)
                 const docRef = doc(db, "items", docId);
                 await updateDoc(docRef, updateData);
 
-                status.innerText = "更新完了！元のページに戻ります...";
-                status.style.color = "green";
-                
-                // 少し待ってから詳細ページに戻る
-                setTimeout(() => {
-                    window.location.href = `detail.html?id=${docId}`;
-                }, 1500);
+                status.innerText = "更新完了！元のページに戻ります..."; status.style.color = "green";
+                setTimeout(() => { window.location.href = `detail.html?id=${docId}`; }, 1500);
 
             } catch (error) {
                 console.error(error);
                 status.innerText = "エラー: " + error.message; status.style.color = "red";
                 btn.disabled = false; btn.innerText = "更新内容を保存する";
+            }
+        });
+
+        // ★削除処理
+        document.getElementById('deleteBtn').addEventListener('click', async () => {
+            if (!confirm("本当にこのデータを削除しますか？\nこの操作は取り消せません。")) return;
+            if (!auth.currentUser) { alert("認証エラー"); return; }
+
+            const btn = document.getElementById('deleteBtn');
+            btn.disabled = true; btn.innerText = "削除中...";
+
+            try {
+                // 1. 画像ファイルを削除（あれば）
+                if (currentData.imageUrlFront) {
+                    try {
+                        const imgRef = ref(storage, currentData.imageUrlFront);
+                        await deleteObject(imgRef);
+                    } catch(e) { console.log("表面画像削除スキップ: " + e.message); }
+                }
+                if (currentData.imageUrlBack) {
+                    try {
+                        const imgRef = ref(storage, currentData.imageUrlBack);
+                        await deleteObject(imgRef);
+                    } catch(e) { console.log("裏面画像削除スキップ: " + e.message); }
+                }
+
+                // 2. データベースのドキュメントを削除
+                await deleteDoc(doc(db, "items", docId));
+
+                alert("削除しました。一覧ページに戻ります。");
+                window.location.href = "index.html";
+
+            } catch (error) {
+                console.error(error);
+                alert("削除中にエラーが発生しました: " + error.message);
+                btn.disabled = false; btn.innerText = "このデータを完全に削除する";
             }
         });
     </script>
