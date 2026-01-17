@@ -464,7 +464,7 @@
                 logActivity('UPDATE', `Updated item ${updateData.refNo} (${updateData.title_jp})`, docId);
 
                 status.innerText = "更新完了！元のページに戻ります..."; status.style.color = "green";
-                setTimeout(() => { window.location.href = `admin.html`; }, 1500);
+                setTimeout(() => { window.history.back(); }, 1500);
 
             } catch (error) {
                 console.error(error);
