@@ -1,55 +1,177 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>データ編集 | 関係者専用</title>
     <style>
-        body { font-family: "Yu Mincho", serif; background-color: #f0f0f0; padding: 20px; color: #333; }
-        .form-container { background: white; padding: 30px; border: 1px solid #ccc; max-width: 700px; margin: 0 auto; }
-        h1 { font-size: 20px; border-bottom: 2px solid #555; padding-bottom: 10px; }
-        
-        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #aaa; }
-        label { display: block; font-weight: bold; margin-top: 15px; margin-bottom: 5px; font-size: 14px; }
-        
-        .google-btn {
-            background-color: #fff; color: #757575; border: 1px solid #ddd; padding: 10px 20px; font-weight: bold; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; width: 100%; font-family: "Roboto", sans-serif; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: background-color 0.2s;
+        body {
+            font-family: "Yu Mincho", serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            color: #333;
         }
-        .google-btn:hover { background-color: #f8f8f8; }
-        .google-icon { width: 18px; height: 18px; margin-right: 10px; }
 
-        button.submit-btn { background-color: #0056b3; color: white; padding: 12px; border: none; cursor: pointer; font-size: 16px; width: 100%; margin-top: 20px; }
-        button.submit-btn:hover { background-color: #004494; }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border: 1px solid #ccc;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 20px;
+            border-bottom: 2px solid #555;
+            padding-bottom: 10px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            border: 1px solid #aaa;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .google-btn {
+            background-color: #fff;
+            color: #757575;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            font-family: "Roboto", sans-serif;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s;
+        }
+
+        .google-btn:hover {
+            background-color: #f8f8f8;
+        }
+
+        .google-icon {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+        }
+
+        button.submit-btn {
+            background-color: #0056b3;
+            color: white;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button.submit-btn:hover {
+            background-color: #004494;
+        }
 
         /* 削除ボタンのデザイン（赤色） */
-        button.delete-btn { 
-            background-color: #d9534f; color: white; padding: 10px; border: none; cursor: pointer; font-size: 14px; width: 100%; margin-top: 40px; 
-            border-radius: 4px; opacity: 0.8;
+        button.delete-btn {
+            background-color: #d9534f;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 40px;
+            border-radius: 4px;
+            opacity: 0.8;
         }
-        button.delete-btn:hover { background-color: #c9302c; opacity: 1; }
 
-        #login-section { text-align: center; max-width: 400px; margin: 50px auto; background: #fff; padding: 40px; border: 1px solid #ccc; }
-        #edit-section { display: none; }
-        
-        .error-msg { color: red; font-weight: bold; margin-top: 15px; font-size: 13px;}
-        .logout-btn { background-color: #666; font-size: 12px; padding: 5px 10px; color: #fff; border: none; cursor: pointer; float: right; }
-        .input-note { font-size: 11px; color: #d00; margin-top: -8px; margin-bottom: 10px; display: block; }
+        button.delete-btn:hover {
+            background-color: #c9302c;
+            opacity: 1;
+        }
 
-        .current-img { width: 100px; height: auto; border: 1px solid #ccc; margin-bottom: 5px; display: block; }
+        #login-section {
+            text-align: center;
+            max-width: 400px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 40px;
+            border: 1px solid #ccc;
+        }
+
+        #edit-section {
+            display: none;
+        }
+
+        .error-msg {
+            color: red;
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        .logout-btn {
+            background-color: #666;
+            font-size: 12px;
+            padding: 5px 10px;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            float: right;
+        }
+
+        .input-note {
+            font-size: 11px;
+            color: #d00;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .current-img {
+            width: 100px;
+            height: auto;
+            border: 1px solid #ccc;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .nav-link- dashboard {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 12px;
+        }
     </style>
 </head>
+
 <body>
 
     <div id="login-section">
         <h2>資料管理者ログイン (編集)</h2>
-        <p>データの修正には許可されたドメインの<br>Googleアカウントが必要です。</p>
+        <p>データの修正には管理者権限が必要です。</p>
         <button class="google-btn" onclick="loginWithGoogle()">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="google-icon">
             Googleでログイン
         </button>
         <p id="login-error" class="error-msg"></p>
-        <p style="font-size:12px; margin-top:20px;"><a href="#" onclick="window.history.back();">← 元のページに戻る</a></p>
+        <p style="font-size:12px; margin-top:20px;">
+            <a href="admin.html">← 管理画面へ</a> | <a href="#" onclick="window.history.back();">戻る</a>
+        </p>
     </div>
 
     <div id="edit-section" class="form-container">
@@ -57,7 +179,10 @@
             <button class="logout-btn" onclick="logout()">ログアウト</button>
             <h1 style="margin-top:0;">データ編集・修正</h1>
         </div>
-        <p style="font-size:12px; color:#0056b3;">※内容を書き換えて「更新保存」を押してください。</p>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <p style="font-size:12px; color:#0056b3;">※内容を書き換えて「更新保存」を押してください。</p>
+            <a href="admin.html" style="font-size:12px;">管理者ダッシュボードへ</a>
+        </div>
 
         <form id="editForm">
             <div style="display:flex; gap:20px;">
@@ -146,35 +271,73 @@
             </div>
 
             <button type="submit" id="submitBtn" class="submit-btn">更新内容を保存する</button>
-            
+
             <button type="button" id="deleteBtn" class="delete-btn">このデータを完全に削除する</button>
         </form>
-        
+
         <div id="status" style="margin-top:15px; color:#d9534f; font-weight:bold;"></div>
-        <a href="#" onclick="window.history.back();" style="display:block; text-align:center; margin-top:20px;">← キャンセルして戻る</a>
+        <a href="#" onclick="window.history.back();" style="display:block; text-align:center; margin-top:20px;">←
+            キャンセルして戻る</a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        // deleteDocを追加
-        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        // deleteObjectを追加
+        import { getFirestore, doc, getDoc, collection, getDocs, addDoc, deleteDoc, updateDoc, query, where, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-             const firebaseConfig = {
-       apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
-       authDomain: "builderx-forik.firebaseapp.com",
-       projectId: "builderx-forik",
-       storageBucket: "builderx-forik.firebasestorage.app",
-       messagingSenderId: "704985970287",
-       appId: "1:704985970287:web:43924b7901b6f8f4df7f9a",
-    }; 
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
+            authDomain: "builderx-forik.firebaseapp.com",
+            projectId: "builderx-forik",
+            storageBucket: "builderx-forik.firebasestorage.app",
+            messagingSenderId: "704985970287",
+            appId: "1:704985970287:web:43924b7901b6f8f4df7f9a",
+        };
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+
+        const USERS_COLLECTION = "allowed_users";
+        const LOGS_COLLECTION = "activity_logs";
+        const ALLOWED_DOMAIN = "ac.jp";
+
+        async function checkPermission(user) {
+            if (!user) return false;
+
+            // 1. Domain Check for Editors (Allow all ac.jp)
+            if (user.email.endsWith(ALLOWED_DOMAIN)) return true;
+
+            try {
+                // 2. Database Check (Explicitly allowed users)
+                const q = query(collection(db, USERS_COLLECTION), where("email", "==", user.email));
+                const snapshot = await getDocs(q);
+                if (!snapshot.empty) return true;
+
+                // 3. Fallback for bootstrap
+                const allUsersQ = query(collection(db, USERS_COLLECTION), limit(1));
+                const allUsersSnap = await getDocs(allUsersQ);
+                if (allUsersSnap.empty) return true;
+
+                return false;
+            } catch (e) {
+                console.error("Check failed:", e);
+                return false;
+            }
+        }
+
+        async function logActivity(action, details, targetId = null) {
+            if (!auth.currentUser) return;
+            try {
+                await addDoc(collection(db, LOGS_COLLECTION), {
+                    action: action, details: details, targetId: targetId,
+                    user: auth.currentUser.email, timestamp: serverTimestamp()
+                });
+            } catch (e) { console.error("Log failed:", e); }
+        }
 
         const params = new URLSearchParams(window.location.search);
         const docId = params.get('id');
@@ -187,21 +350,20 @@
             e.target.value = halfVal.replace(/[^0-9-]/g, '');
         });
 
-        const ALLOWED_DOMAIN = "ac.jp"; 
-        
         // 削除時に画像のURLが必要なので、読み込み時に保存しておく変数
         let currentData = null;
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                if (user.email.endsWith(ALLOWED_DOMAIN)) {
+                const allowed = await checkPermission(user);
+                if (allowed) {
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('edit-section').style.display = 'block';
                     document.getElementById('login-error').innerText = "";
                     loadDataForEdit();
                 } else {
                     document.getElementById('login-error').innerText = `エラー: ${user.email} は許可されていません。`;
-                    logout();
+                    signOut(auth);
                 }
             } else {
                 document.getElementById('login-section').style.display = 'block';
@@ -212,14 +374,14 @@
         window.loginWithGoogle = () => {
             signInWithPopup(auth, provider).catch((error) => {
                 console.error(error);
-                document.getElementById('login-error').innerText = "ログイン失敗";
+                document.getElementById('login-error').innerText = "ログイン失敗: " + error.message;
             });
         };
 
         window.logout = () => { signOut(auth); };
 
         async function loadDataForEdit() {
-            if(!docId) { alert("エラー: IDが指定されていません"); return; }
+            if (!docId) { alert("エラー: IDが指定されていません"); return; }
             try {
                 const docRef = doc(db, "items", docId);
                 const docSnap = await getDoc(docRef);
@@ -238,23 +400,23 @@
                     setValue('divider_loc', data.divider_loc);
                     setValue('print_color', data.print_color);
                     setValue('remarks', data.remarks);
-                    if(Array.isArray(data.keywords)){
+                    if (Array.isArray(data.keywords)) {
                         document.getElementById('keywords').value = data.keywords.join(" ");
                     }
-                    if(data.imageUrlFront) document.getElementById('preview-front').src = data.imageUrlFront;
-                    if(data.imageUrlBack) document.getElementById('preview-back').src = data.imageUrlBack;
+                    if (data.imageUrlFront) document.getElementById('preview-front').src = data.imageUrlFront;
+                    if (data.imageUrlBack) document.getElementById('preview-back').src = data.imageUrlBack;
                 } else { alert("データが見つかりません"); }
-            } catch(e) { console.error(e); alert("読み込みエラー"); }
+            } catch (e) { console.error(e); alert("読み込みエラー"); }
         }
 
-        function setValue(id, val) { if(val) document.getElementById(id).value = val; }
+        function setValue(id, val) { if (val) document.getElementById(id).value = val; }
 
         // 更新処理
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
             const status = document.getElementById('status');
-            
+
             if (!auth.currentUser) { alert("認証エラー"); return; }
 
             btn.disabled = true; btn.innerText = "更新中...";
@@ -298,8 +460,11 @@
                 const docRef = doc(db, "items", docId);
                 await updateDoc(docRef, updateData);
 
+                // LOG
+                logActivity('UPDATE', `Updated item ${updateData.refNo} (${updateData.title_jp})`, docId);
+
                 status.innerText = "更新完了！元のページに戻ります..."; status.style.color = "green";
-                setTimeout(() => { window.location.href = `detail.html?id=${docId}`; }, 1500);
+                setTimeout(() => { window.location.href = `admin.html`; }, 1500);
 
             } catch (error) {
                 console.error(error);
@@ -322,20 +487,23 @@
                     try {
                         const imgRef = ref(storage, currentData.imageUrlFront);
                         await deleteObject(imgRef);
-                    } catch(e) { console.log("表面画像削除スキップ: " + e.message); }
+                    } catch (e) { console.log("表面画像削除スキップ: " + e.message); }
                 }
                 if (currentData.imageUrlBack) {
                     try {
                         const imgRef = ref(storage, currentData.imageUrlBack);
                         await deleteObject(imgRef);
-                    } catch(e) { console.log("裏面画像削除スキップ: " + e.message); }
+                    } catch (e) { console.log("裏面画像削除スキップ: " + e.message); }
                 }
 
                 // 2. データベースのドキュメントを削除
                 await deleteDoc(doc(db, "items", docId));
 
+                // LOG
+                logActivity('DELETE', `Deleted item ${currentData.refNo || 'Unknown'}`, docId);
+
                 alert("削除しました。一覧ページに戻ります。");
-                window.location.href = "takada.html";
+                window.location.href = "admin.html";
 
             } catch (error) {
                 console.error(error);
@@ -345,4 +513,5 @@
         });
     </script>
 </body>
+
 </html>
