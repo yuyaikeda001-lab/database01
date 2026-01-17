@@ -580,19 +580,28 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        const ALLOWED_DOMAIN = "ac.jp";
         const USERS_COLLECTION = "allowed_users";
         const LOGS_COLLECTION = "activity_logs";
 
         async function checkPermission(user) {
             if (!user) return false;
-            // 1. Legacy Check
-            if (user.email.endsWith(ALLOWED_DOMAIN)) return true;
-            // 2. Database Check
+
             try {
+                // 1. Check if user is explicitly allowed in database
                 const q = query(collection(db, USERS_COLLECTION), where("email", "==", user.email));
                 const snapshot = await getDocs(q);
-                return !snapshot.empty;
+                if (!snapshot.empty) return true;
+
+                // 2. Fallback: If no allowed users exist at all, allow the first user to access (Bootstrap mode)
+                // This prevents lockout when starting fresh.
+                const allUsersQ = query(collection(db, USERS_COLLECTION), limit(1));
+                const allUsersSnap = await getDocs(allUsersQ);
+                if (allUsersSnap.empty) {
+                    console.log("No allowed users configured. Allowing access to bootstrap admin.");
+                    return true;
+                }
+
+                return false;
             } catch (e) {
                 console.error("Permission check failed:", e);
                 return false;
