@@ -234,6 +234,28 @@
             <input type="text" id="keywords" placeholder="例: 人物あり 昌徳宮 1930年">
             <span class="input-note" style="color:#666; margin-top:-8px;">※空白を入れると自動で区切られます</span>
 
+            <!-- ★活字化機能追加 -->
+            <div style="margin-top:20px; border-top:1px dashed #ccc; padding-top:10px;">
+                <label style="display:flex; align-items:center; cursor:pointer;">
+                    <input type="checkbox" id="chk-transcription" onchange="toggleTranscription()"
+                        style="width:auto; margin:0 8px 0 0;">
+                    活字化 (翻刻・テキストデータ) を追加する
+                </label>
+                <div id="transcription-area" style="display:none; margin-top:10px;">
+                    <p style="font-size:12px; color:#555;">※内容を縦書きで入力できます。</p>
+                    <textarea id="transcription_content" style="
+                        width: 100%; 
+                        height: 300px; 
+                        writing-mode: vertical-rl; 
+                        font-family: 'Yu Mincho', serif; 
+                        padding: 10px; 
+                        line-height: 2.0; 
+                        font-size: 16px; 
+                        border: 1px solid #999; 
+                        background: #fffafa;"></textarea>
+                </div>
+            </div>
+
             <div style="background:#f9f9f9; padding:15px; margin-top:15px; border:1px dashed #ccc;">
                 <label>【表面】画像 (必須)</label> <input type="file" id="imageFileFront" accept="image/*" required>
                 <label>【裏面】画像</label> <input type="file" id="imageFileBack" accept="image/*">
@@ -252,7 +274,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
@@ -315,6 +337,13 @@
             e.target.value = halfVal.replace(/[^0-9-]/g, '');
         });
 
+        // ★活字化エリア開閉
+        window.toggleTranscription = () => {
+            const chk = document.getElementById('chk-transcription');
+            const area = document.getElementById('transcription-area');
+            area.style.display = chk.checked ? 'block' : 'none';
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const allowed = await checkPermission(user);
@@ -375,6 +404,10 @@
                 const keywordsStr = document.getElementById('keywords').value;
                 const keywordArray = keywordsStr.split(/[,、\s　]+/).filter(k => k);
 
+                // 活字化データの取得
+                const isTrans = document.getElementById('chk-transcription').checked;
+                const transContent = isTrans ? document.getElementById('transcription_content').value : "";
+
                 const newData = {
                     refNo: document.getElementById('refNo').value,
                     form_type: document.getElementById('form_type').value,
@@ -387,6 +420,7 @@
                     divider_loc: document.getElementById('divider_loc').value,
                     print_color: document.getElementById('print_color').value,
                     remarks: document.getElementById('remarks').value,
+                    transcription_content: transContent, // ★追加
                     keywords: keywordArray,
                     imageUrlFront: urlFront,
                     imageUrlBack: urlBack,
@@ -401,6 +435,7 @@
 
                 status.innerText = "登録完了！"; status.style.color = "green";
                 document.getElementById('uploadForm').reset();
+                document.getElementById('transcription-area').style.display = 'none'; // リセット時に隠す
                 window.scrollTo(0, 0);
 
             } catch (error) {
