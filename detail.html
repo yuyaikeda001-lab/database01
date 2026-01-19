@@ -326,6 +326,25 @@
 
         <div class="info-section">
             <div class="section-title">書誌情報</div>
+
+            <!-- ★活字化(翻刻)表示エリア -->
+            <div id="transcription-section"
+                style="display:none; margin: 15px; padding: 15px; background-color:#fffafa; border:1px dashed #ccc;">
+                <h3 style="margin-top:0; font-size:16px; border-bottom:1px solid #ddd; padding-bottom:5px;">活字化 (翻刻)
+                </h3>
+                <div id="val-transcription" style="
+                    width: 100%; 
+                    min-height: 200px; 
+                    writing-mode: vertical-rl; 
+                    font-family: 'Yu Mincho', serif; 
+                    line-height: 2.0; 
+                    font-size: 16px; 
+                    white-space: pre-wrap; 
+                    overflow-x: auto;
+                    padding: 10px;
+                "></div>
+            </div>
+
             <table class="info-table">
                 <tr>
                     <th>和文タイトル</th>
@@ -449,6 +468,14 @@
                 document.getElementById('box-back').style.display = "block";
             } else {
                 document.getElementById('box-back').style.display = "none";
+            }
+
+            // ★活字化(翻刻)表示ロジック
+            if (data.transcription_content) {
+                document.getElementById('transcription-section').style.display = "block";
+                document.getElementById('val-transcription').innerText = data.transcription_content;
+            } else {
+                document.getElementById('transcription-section').style.display = "none";
             }
 
             setText('val-title-jp', data.title_jp || data.title);
