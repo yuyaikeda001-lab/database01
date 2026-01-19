@@ -4,91 +4,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>運営情報 | データベース</title>
+    <title>運営情報 | 歴史資料デジタルアーカイブ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #0061ff, #60efff);
+            --text-main: #2b2b2b;
+            --text-sub: #6e6e73;
+            --bg-color: #f5f7fa;
+            --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
         body {
-            font-family: "Yu Mincho", "YuMincho", serif;
-            background-color: #f9f9f9;
+            font-family: "Montserrat", "Noto Sans JP", sans-serif;
+            background-color: var(--bg-color);
+            /* 背景にテック感のあるグリッドパターンを追加 */
+            background-image:
+                linear-gradient(rgba(0, 97, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 97, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-
-        header {
-            border-bottom: 2px solid #555;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-        }
-
-        h1 {
-            font-size: 20px;
-            margin: 0;
-        }
-
-        .content {
-            background: #fff;
-            padding: 30px;
-            border: 1px solid #ccc;
-            max-width: 800px;
-            margin: 0 auto;
+            padding: 0;
             line-height: 1.8;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        h2 {
-            font-size: 18px;
-            border-left: 5px solid #555;
-            padding-left: 10px;
-            margin-top: 30px;
+        /* --- ヘッダー（共通） --- */
+        header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        p {
-            margin-bottom: 15px;
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .back-link {
-            display: block;
-            margin-top: 30px;
-            text-align: center;
-            color: #0056b3;
+        .site-name {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: linear-gradient(45deg, #111, #444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .site-name a {
             text-decoration: none;
         }
 
-        .back-link:hover {
-            text-decoration: underline;
+        .site-sub {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* --- コンテンツエリア --- */
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 60px auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #888;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* --- グラスモーフィズムパネル --- */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* パネル左側の青いアクセントバー */
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+        }
+
+        .panel-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, #ddd, transparent);
+        }
+
+        .panel-content p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        /* --- データリスト（スペック表のようなデザイン） --- */
+        .spec-list {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .spec-label {
+            font-weight: 600;
+            color: #0061ff;
+            text-align: right;
+            padding-right: 15px;
+            border-right: 1px solid #ddd;
+        }
+
+        .spec-value {
+            color: #444;
+        }
+
+        /* --- 戻るボタン --- */
+        .back-btn-area {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 30px;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+            background: #fff;
+            color: #555;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-back:hover {
+            border-color: #0061ff;
+            color: #0061ff;
+            box-shadow: 0 5px 15px rgba(0, 97, 255, 0.1);
+        }
+
+        /* --- フッター --- */
+        footer {
+            background: #1a1a1a;
+            color: #777;
+            text-align: center;
+            padding: 40px 0;
+            font-size: 12px;
+            margin-top: auto;
+            border-top: 1px solid #333;
+        }
+
+        footer a {
+            color: #aaa;
+            margin: 0 10px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .spec-list {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .spec-label {
+                text-align: left;
+                border-right: none;
+                color: #888;
+                font-size: 12px;
+            }
+
+            .spec-value {
+                margin-bottom: 10px;
+                font-weight: 500;
+            }
         }
     </style>
 </head>
 
 <body>
+
     <header>
-        <h1>データベースについて</h1>
+        <div class="header-inner">
+            <div class="site-logo">
+                <div class="site-name"><a href="index.html">歴史資料デジタルアーカイブ</a></div>
+                <div class="site-sub">Historical Materials Digital Archive</div>
+            </div>
+        </div>
     </header>
 
-    <div class="content">
-        <h2>データベースの目的</h2>
-        <p>
-            本データベースは、歴史的価値のある写真絵はがきをデジタルアーカイブ化し、研究および教育目的での利用を促進するために構築されました。
-            特に高田保馬に関連する資料を中心に収集・整理を行っています。
-        </p>
+    <div class="container">
+        <div class="page-header">
+            <div class="page-subtitle">ABOUT SYSTEM</div>
+            <h1 class="page-title">PROJECT OVERVIEW</h1>
+            <p style="font-size:13px; color:#666;">未来へ継承されるべき記憶のデータベース</p>
+        </div>
 
-        <h2>運営者情報</h2>
-        <p>
-            <strong>プロジェクト名：</strong> 歴史資料アーカイブプロジェクト<br>
-            <strong>代表：</strong> <br>
-            <strong>開発者：</strong> 池田　悠耶
-        </p>
+        <section class="glass-panel">
+            <h2 class="panel-title">CORE MISSION</h2>
+            <div class="panel-content">
+                <p>
+                    本アーカイブは、散逸の危機にある歴史的視覚資料をデジタルデータとして保存し、
+                    時間と場所の制約を超えて世界中の研究者・学習者に提供することを目的としたプロジェクトです。
+                </p>
+                <p>
+                    特に、写真絵はがき、古文書、地図資料を中心に収集・整理を行い、
+                    メタデータ整備と検索システムの構築を進めています。
+                </p>
+            </div>
+        </section>
 
-        <h2>お問い合わせ</h2>
-        <p>
-            データに関するご質問や画像の利用申請については、以下のメールアドレスまでご連絡ください。<br>
-            ＠wesleyan.ac.jp
-        </p>
+        <section class="glass-panel">
+            <h2 class="panel-title">SYSTEM DATA</h2>
+            <div class="spec-list">
+                <div class="spec-label">PROJECT NAME</div>
+                <div class="spec-value">歴史資料デジタルアーカイブプロジェクト</div>
 
-        <a href="takada.html" class="back-link">データベース一覧に戻る</a>
+                <div class="spec-label">OPERATOR</div>
+                <div class="spec-value">---</div>
+
+                <div class="spec-label">LOCATION</div>
+                <div class="spec-value">Nagasaki,Japan</div>
+
+                <div class="spec-label">TECHNOLOGY</div>
+                <div class="spec-value">Google Cloud Platform / Firebase </div>
+
+                <div class="spec-label">CONTACT</div>
+                <div class="spec-value">@wesleyan.ac.jp</div>
+            </div>
+        </section>
+
+        <section class="glass-panel">
+            <h2 class="panel-title">LICENSE PROTOCOL</h2>
+            <div class="panel-content">
+                <p>
+                    当データベースで公開されている画像の著作権は、原資料の所蔵者または本プロジェクトに帰属します。
+                    研究・教育目的での利用については、上記連絡先までお問い合わせください。
+                </p>
+            </div>
+        </section>
+
+        <div class="back-btn-area">
+            <a href="takada.html" class="btn-back">
+                <span>←</span> 戻る
+            </a>
+        </div>
+
     </div>
+
     <footer>
         <p style="margin-top:20px; opacity:0.6;">Digital Archive Project &copy; 2026 Curated by Yuya Ikeda</p>
     </footer>
+
 </body>
 
 </html>
