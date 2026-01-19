@@ -528,9 +528,15 @@
                         <h1>Data Management</h1>
                         <p style="color:#999; font-size:13px; margin-top:5px;">登録済みデータの編集・削除・新規登録</p>
                     </div>
-                    <button class="btn-add" onclick="window.location.href='upload.html'">
-                        <span>+</span> 新規登録
-                    </button>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <select id="db-selector" style="padding:8px; border-radius:5px; border:1px solid #ccc;">
+                            <option value="items">高田保馬 (Default)</option>
+                            <!-- Future databases can be added here -->
+                        </select>
+                        <button class="btn-add" onclick="window.location.href='upload.html'">
+                            <span>+</span> 新規登録
+                        </button>
+                    </div>
                 </header>
 
                 <div class="data-table-container">
@@ -737,12 +743,22 @@
             });
         });
 
+        // Database Selector Listener
+        const dbSelector = document.getElementById('db-selector');
+        if (dbSelector) {
+            dbSelector.addEventListener('change', () => {
+                loadItems();
+            });
+        }
+
         // --- DATA MANAGEMENT ---
         async function loadItems() {
+            const dbSelector = document.getElementById('db-selector');
+            const collectionName = dbSelector ? dbSelector.value : "items";
             const tbody = document.getElementById('item-list-body');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">Loading...</td></tr>';
             try {
-                const q = query(collection(db, "items"), orderBy("refNo", "asc"));
+                const q = query(collection(db, collectionName), orderBy("refNo", "asc"));
                 const querySnapshot = await getDocs(q);
                 tbody.innerHTML = '';
                 querySnapshot.forEach(docSnap => {
