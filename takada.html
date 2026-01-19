@@ -276,6 +276,30 @@
         </nav>
     </header>
 
+    <style>
+        /* ... existing styles ... */
+        /* 追加・変更スタイル */
+        .advanced-search-toggle {
+            cursor: pointer;
+            color: #0056b3;
+            text-decoration: underline;
+            font-size: 13px;
+            margin-left: 10px;
+            user-select: none;
+        }
+
+        .advanced-search-area {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .advanced-search-area.open {
+            display: block;
+        }
+    </style>
+
     <div class="search-panel">
         <div class="search-row">
             <div class="search-item">
@@ -284,26 +308,58 @@
             </div>
             <div class="search-item">
                 <label>整理番号</label>
-                <input type="text" id="s-ref" placeholder="例: 1-1">
+                <input type="text" id="s-ref" placeholder="例: 1-1" style="width: 100px;">
             </div>
             <div class="search-item">
-                <label>使用状況</label>
-                <select id="s-usage">
-                    <option value="">全て</option>
-                    <option value="未使用">未使用</option>
-                    <option value="使用済み">使用済み</option>
-                </select>
-            </div>
-            <div class="search-item">
-                <label>刷色</label>
-                <select id="s-color">
-                    <option value="">全て</option>
-                    <option value="モノクロ">モノクロ</option>
-                    <option value="カラー">カラー</option>
-                    <option value="手彩色">手彩色</option>
-                </select>
+                <span class="advanced-search-toggle" onclick="toggleAdvancedSearch()">▼ 詳細検索を表示</span>
             </div>
         </div>
+
+        <div id="advanced-area" class="advanced-search-area">
+            <div class="search-row">
+                <div class="search-item">
+                    <label>形態</label>
+                    <select id="s-form-type">
+                        <option value="">全て</option>
+                        <option value="絵はがき">絵はがき</option>
+                        <option value="絵はがき帳">絵はがき帳</option>
+                        <option value="写真・アルバム">写真・アルバム</option>
+                        <option value="書簡・封筒">書簡・封筒</option>
+                        <option value="地図">地図</option>
+                        <option value="書籍・冊子">書籍・冊子</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                <div class="search-item">
+                    <label>発行 (一部一致)</label>
+                    <input type="text" id="s-publisher" placeholder="例: 鎮西学院大学">
+                </div>
+                <div class="search-item">
+                    <label>年代/消印</label>
+                    <input type="text" id="s-date" placeholder="例: 1930">
+                </div>
+            </div>
+            <div class="search-row">
+                <div class="search-item">
+                    <label>使用状況</label>
+                    <select id="s-usage">
+                        <option value="">全て</option>
+                        <option value="未使用">未使用</option>
+                        <option value="使用済み">使用済み</option>
+                    </select>
+                </div>
+                <div class="search-item">
+                    <label>刷色</label>
+                    <select id="s-color">
+                        <option value="">全て</option>
+                        <option value="モノクロ">モノクロ</option>
+                        <option value="カラー">カラー</option>
+                        <option value="手彩色">手彩色</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <div class="search-actions">
             <button class="btn-search" onclick="window.performSearch()">検索実行</button>
             <button class="btn-clear" onclick="window.clearSearch()">クリア</button>
@@ -357,7 +413,9 @@
                     item.id = doc.id;
                     // 検索用文字列作成
                     const kws = Array.isArray(item.keywords) ? item.keywords.join(" ") : (item.keywords || "");
-                    item._searchStr = `${item.title_jp || ""} ${item.title_en || ""} ${kws} ${item.publisher_jp || ""}`.toLowerCase();
+                    item._searchStr = `${item.title_jp || ""} ${item.title_en || ""} ${kws} ${item.publisher_jp || ""} ${item.remarks || ""}`.toLowerCase();
+                    // 発行所検索用
+                    item._publisherStr = `${item.publisher_jp || ""} ${item.publisher_en || ""}`.toLowerCase();
                     allData.push(item);
                 });
 
@@ -370,18 +428,61 @@
             }
         }
 
+        window.toggleAdvancedSearch = () => {
+            const area = document.getElementById('advanced-area');
+            const toggleBtn = document.querySelector('.advanced-search-toggle');
+            if (area.style.display === 'block') {
+                area.style.display = 'none';
+                toggleBtn.innerText = '▼ 詳細検索を表示';
+            } else {
+                area.style.display = 'block';
+                toggleBtn.innerText = '▲ 詳細検索を閉じる';
+            }
+        };
+
         window.performSearch = () => {
-            const kw = document.getElementById('s-keyword').value.trim().toLowerCase();
+            const kwInput = document.getElementById('s-keyword').value.trim().toLowerCase();
             const ref = document.getElementById('s-ref').value.trim();
+
+            // 詳細条件
+            const formType = document.getElementById('s-form-type').value;
+            const publisher = document.getElementById('s-publisher').value.trim().toLowerCase();
+            const dateStr = document.getElementById('s-date').value.trim();
             const usage = document.getElementById('s-usage').value;
             const color = document.getElementById('s-color').value;
 
+            // キーワードをスペースで分割して配列化 (空文字除去)
+            const keywords = kwInput.split(/[\s　]+/).filter(k => k.length > 0);
+
             filteredData = allData.filter(item => {
                 let isMatch = true;
-                if (kw && !item._searchStr.includes(kw)) isMatch = false;
+
+                // キーワード (AND検索)
+                if (keywords.length > 0) {
+                    const str = item._searchStr;
+                    // すべてのキーワードが含まれているか確認
+                    const hasAllKeywords = keywords.every(k => str.includes(k));
+                    if (!hasAllKeywords) isMatch = false;
+                }
+
+                // 整理番号 (前方一致)
                 if (ref && (!item.refNo || !item.refNo.startsWith(ref))) isMatch = false;
+
+                // 形態
+                if (formType && item.form_type !== formType) isMatch = false;
+
+                // 発行 (部分一致)
+                if (publisher && !item._publisherStr.includes(publisher)) isMatch = false;
+
+                // 年代/消印 (部分一致)
+                if (dateStr && (!item.postmark_date || !item.postmark_date.includes(dateStr))) isMatch = false;
+
+                // 使用状況
                 if (usage && item.usage_status !== usage) isMatch = false;
+
+                // 刷色
                 if (color && item.print_color !== color) isMatch = false;
+
                 return isMatch;
             });
 
@@ -391,8 +492,12 @@
         window.clearSearch = () => {
             document.getElementById('s-keyword').value = "";
             document.getElementById('s-ref').value = "";
+            document.getElementById('s-form-type').value = "";
+            document.getElementById('s-publisher').value = "";
+            document.getElementById('s-date').value = "";
             document.getElementById('s-usage').value = "";
             document.getElementById('s-color').value = "";
+
             filteredData = [...allData];
             updateDisplay();
         };
