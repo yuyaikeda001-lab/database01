@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>お問い合わせ | 歴史資料デジタルアーカイブ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Noto+Serif+JP:wght@300;500;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&family=Noto+Serif+JP:wght@300;500;700&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
             --primary-navy: #0f2350;
@@ -39,12 +42,21 @@
             top: 0;
             z-index: 100;
         }
+
         .header-inner {
-            max-width: 1000px; margin: 0 auto; padding: 0 20px;
-            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
+
         .site-logo a {
-            text-decoration: none; color: var(--primary-navy); font-weight: 700; letter-spacing: 1px;
+            text-decoration: none;
+            color: var(--primary-navy);
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .container {
@@ -68,28 +80,60 @@
             overflow: hidden;
         }
 
-        .contact-panel::before, .contact-panel::after {
-            content: ''; position: absolute; left: 0; width: 100%; height: 3px;
+        .contact-panel::before,
+        .contact-panel::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
             background: linear-gradient(90deg, var(--primary-navy), var(--accent-gold), var(--primary-navy));
         }
-        .contact-panel::before { top: 0; }
-        .contact-panel::after { bottom: 0; }
 
-        .panel-header { text-align: center; margin-bottom: 40px; }
+        .contact-panel::before {
+            top: 0;
+        }
+
+        .contact-panel::after {
+            bottom: 0;
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
         .panel-title {
-            font-size: 28px; font-weight: 500; color: var(--primary-navy); margin: 0;
-            letter-spacing: 0.1em; font-family: "Noto Serif JP", serif;
-        }
-        .panel-sub {
-            font-size: 11px; color: var(--accent-gold); letter-spacing: 3px; margin-top: 10px;
-            text-transform: uppercase; font-weight: 600;
+            font-size: 28px;
+            font-weight: 500;
+            color: var(--primary-navy);
+            margin: 0;
+            letter-spacing: 0.1em;
+            font-family: "Noto Serif JP", serif;
         }
 
-        .input-group { margin-bottom: 30px; position: relative; }
-        
+        .panel-sub {
+            font-size: 11px;
+            color: var(--accent-gold);
+            letter-spacing: 3px;
+            margin-top: 10px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
         .input-label {
-            font-size: 12px; color: var(--primary-navy); display: block; margin-bottom: 8px;
-            font-weight: 600; letter-spacing: 1px; opacity: 0.7;
+            font-size: 12px;
+            color: var(--primary-navy);
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            opacity: 0.7;
         }
 
         .modern-input {
@@ -105,56 +149,128 @@
             box-sizing: border-box;
             border-radius: 0;
         }
-        select.modern-input { cursor: pointer; color: #333; }
-        
+
+        select.modern-input {
+            cursor: pointer;
+            color: #333;
+        }
+
         .modern-input:focus {
             outline: none;
             border-bottom: 1px solid var(--accent-gold);
             background: linear-gradient(to bottom, transparent 95%, rgba(197, 160, 89, 0.1) 100%);
         }
 
-        .modern-input:focus + .focus-line { width: 100%; }
+        .modern-input:focus+.focus-line {
+            width: 100%;
+        }
+
         .focus-line {
-            position: absolute; bottom: 0; left: 0; height: 2px; width: 0;
-            background-color: var(--accent-gold); transition: width 0.4s ease;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            width: 0;
+            background-color: var(--accent-gold);
+            transition: width 0.4s ease;
         }
 
         textarea.modern-input {
-            resize: vertical; min-height: 100px; border: 1px solid #ccc; padding: 10px; margin-top: 5px;
+            resize: vertical;
+            min-height: 100px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 5px;
         }
-        textarea.modern-input:focus { border-color: var(--accent-gold); border-bottom: 1px solid var(--accent-gold); }
+
+        textarea.modern-input:focus {
+            border-color: var(--accent-gold);
+            border-bottom: 1px solid var(--accent-gold);
+        }
 
         #other-subject-group {
             display: none;
             animation: fadeIn 0.5s ease;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         .btn-send {
-            width: 100%; padding: 18px;
-            background-color: var(--primary-navy); color: #fff; border: none;
-            font-family: "Montserrat", sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 2px;
-            cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
+            width: 100%;
+            padding: 18px;
+            background-color: var(--primary-navy);
+            color: #fff;
+            border: none;
+            font-family: "Montserrat", sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-send:hover { background-color: #1a3a7a; box-shadow: 0 10px 20px rgba(15, 35, 80, 0.2); }
-        .btn-send::after { content: '→'; margin-left: 10px; transition: margin-left 0.3s; }
-        .btn-send:hover::after { margin-left: 20px; }
-        .btn-send:disabled { background-color: #999; cursor: not-allowed; }
+
+        .btn-send:hover {
+            background-color: #1a3a7a;
+            box-shadow: 0 10px 20px rgba(15, 35, 80, 0.2);
+        }
+
+        .btn-send::after {
+            content: '→';
+            margin-left: 10px;
+            transition: margin-left 0.3s;
+        }
+
+        .btn-send:hover::after {
+            margin-left: 20px;
+        }
+
+        .btn-send:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
 
         /* 送信完了メッセージ（ポップアップ） */
         #success-msg {
             display: none;
-            text-align: center; color: var(--primary-navy); font-weight: bold; margin-top: 20px;
-            padding: 15px; border: 1px solid var(--accent-gold); background: rgba(197, 160, 89, 0.1);
+            text-align: center;
+            color: var(--primary-navy);
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid var(--accent-gold);
+            background: rgba(197, 160, 89, 0.1);
         }
 
         footer {
-            background: #111; color: #777; text-align: center; padding: 30px;
-            font-size: 12px; border-top: 3px solid var(--primary-navy); margin-top: auto;
+            background: #111;
+            color: #777;
+            text-align: center;
+            padding: 30px;
+            font-size: 12px;
+            border-top: 3px solid var(--primary-navy);
+            margin-top: auto;
         }
-        footer a { color: #aaa; text-decoration: none; margin: 0 10px; }
+
+        footer a {
+            color: #aaa;
+            text-decoration: none;
+            margin: 0 10px;
+        }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -165,7 +281,7 @@
     </header>
 
     <div class="container">
-        
+
         <div class="contact-panel">
             <div class="panel-header">
                 <h1 class="panel-title">お問い合わせ</h1>
@@ -177,7 +293,7 @@
             </div>
 
             <form id="my-form" action="https://formspree.io/f/xqanprqv" method="POST">
-                
+
                 <div class="input-group">
                     <label class="input-label">お名前 (NAME)</label>
                     <input type="text" name="name" class="modern-input" placeholder="歴史 太郎" required>
@@ -192,7 +308,8 @@
 
                 <div class="input-group">
                     <label class="input-label">件名 (SUBJECT)</label>
-                    <select name="subject" id="subjectSelect" class="modern-input" required onchange="toggleOtherInput()">
+                    <select name="subject" id="subjectSelect" class="modern-input" required
+                        onchange="toggleOtherInput()">
                         <option value="" disabled selected>選択してください</option>
                         <option value="資料に関するお問い合わせ">資料に関するお問い合わせ</option>
                         <option value="画像の利用許諾について">画像の利用許諾について</option>
@@ -205,7 +322,8 @@
 
                 <div class="input-group" id="other-subject-group">
                     <label class="input-label">件名の詳細 (SPECIFY)</label>
-                    <input type="text" name="subject_other" id="subjectOther" class="modern-input" placeholder="具体的な件名を入力してください">
+                    <input type="text" name="subject_other" id="subjectOther" class="modern-input"
+                        placeholder="具体的な件名を入力してください">
                     <span class="focus-line"></span>
                 </div>
 
@@ -215,7 +333,7 @@
                 </div>
 
                 <button type="submit" id="my-form-button" class="btn-send">送信する</button>
-                
+
                 <div id="success-msg">送信が完了しました。トップページへ戻ります...</div>
 
             </form>
@@ -224,7 +342,7 @@
     </div>
 
     <footer>
-        <p style="margin-top:15px; opacity:0.6;">&copy; 2025 Digital Archive Project. System All Green.</p>
+        <p style="margin-top:20px; opacity:0.6;">&copy; 2026 Digital Archive Project. All Rights Reserved.</p>
     </footer>
 
     <script>
@@ -246,14 +364,14 @@
 
         // ★Formspreeへの非同期送信（AJAX）処理
         const form = document.getElementById("my-form");
-        
+
         async function handleSubmit(event) {
             event.preventDefault(); // 画面遷移を止める
-            
+
             const status = document.getElementById("success-msg");
             const btn = document.getElementById("my-form-button");
             const data = new FormData(event.target);
-            
+
             // ボタンを無効化して「送信中...」にする
             btn.disabled = true;
             btn.innerText = "TRANSMITTING...";
@@ -269,7 +387,7 @@
                     // 成功したらメッセージを表示
                     status.style.display = "block";
                     form.reset(); // フォームを空にする
-                    
+
                     // 2秒後にトップページへ戻る
                     setTimeout(() => {
                         window.location.href = "index.html";
@@ -296,4 +414,5 @@
     </script>
 
 </body>
+
 </html>

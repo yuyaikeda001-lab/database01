@@ -1,20 +1,39 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>詳細情報 </title>
     <style>
-        body { font-family: "Yu Mincho", "YuMincho", serif; background-color: #f9f9f9; margin: 0; padding: 20px; color: #333; }
-        
-        /* ヘッダー調整 */
-        header { 
-            border-bottom: 2px solid #555; margin-bottom: 20px; padding-bottom: 10px; 
-            display: flex; justify-content: space-between; align-items: center;
+        body {
+            font-family: "Yu Mincho", "YuMincho", serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+            color: #333;
         }
-        h1 { font-size: 20px; margin: 0; }
-        .back-link { color: #0056b3; text-decoration: none; }
-        
+
+        /* ヘッダー調整 */
+        header {
+            border-bottom: 2px solid #555;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .back-link {
+            color: #0056b3;
+            text-decoration: none;
+        }
+
         /* 編集ボタンのデザイン */
         .edit-link {
             font-size: 12px;
@@ -25,77 +44,263 @@
             text-decoration: none;
             border-radius: 3px;
         }
-        .edit-link:hover { background-color: #ddd; }
+
+        .edit-link:hover {
+            background-color: #ddd;
+        }
 
         /* メインレイアウト */
-        .container { display: flex; background: #fff; border: 1px solid #ccc; min-height: 600px; }
-        
-        /* 左カラム（画像セクション） */
-        .image-section { 
-            flex: 1; 
-            padding: 20px 10px;
-            border-right: 1px solid #ddd; 
-            background-color: #fcfcfc; 
+        .container {
+            display: flex;
+            background: #fff;
+            border: 1px solid #ccc;
+            min-height: 600px;
         }
-        .section-title { background-color: #eee; padding: 10px; text-align: center; font-weight: bold; border-bottom: 1px solid #ddd; margin: 0; }
-        
+
+        /* 左カラム（画像セクション） */
+        .image-section {
+            flex: 1;
+            padding: 20px 10px;
+            border-right: 1px solid #ddd;
+            background-color: #fcfcfc;
+        }
+
+        .section-title {
+            background-color: #eee;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            margin: 0;
+        }
+
         .image-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
-            padding-top: 20px; 
+            padding-top: 20px;
             padding-bottom: 20px;
-            place-items: center; 
+            place-items: center;
         }
-        .image-box { text-align: center; width: 100%; max-width: 300px; }
-        .image-label { font-weight: bold; margin-bottom: 10px; display: block; font-size: 16px; color: #555; }
-        .main-img { 
-            max-width: 100%; max-height: 380px; border: 1px solid #ccc; 
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.1); cursor: zoom-in; transition: transform 0.2s;
-            object-fit: contain; background-color: #fff; 
+
+        .image-box {
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
         }
-        .main-img:hover { transform: scale(1.02); }
+
+        .image-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .main-img {
+            max-width: 100%;
+            max-height: 380px;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            cursor: zoom-in;
+            transition: transform 0.2s;
+            object-fit: contain;
+            background-color: #fff;
+        }
+
+        .main-img:hover {
+            transform: scale(1.02);
+        }
 
         /* 右カラム（情報＋関連データ） */
-        .info-section { flex: 1; padding: 0; display: flex; flex-direction: column; }
-        
-        .info-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        .info-table th { width: 30%; padding: 10px; text-align: right; border-bottom: 1px solid #eee; border-right: 1px solid #eee; font-weight: normal; color: #555; vertical-align: top; background: #fafafa; }
-        .info-table td { width: 70%; padding: 10px 15px; border-bottom: 1px solid #eee; vertical-align: top; line-height: 1.6; }
-        .tag { color: #0056b3; margin-right: 8px; cursor: pointer; text-decoration: underline; }
+        .info-section {
+            flex: 1;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .info-table th {
+            width: 30%;
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+            border-right: 1px solid #eee;
+            font-weight: normal;
+            color: #555;
+            vertical-align: top;
+            background: #fafafa;
+        }
+
+        .info-table td {
+            width: 70%;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+            line-height: 1.6;
+        }
+
+        .tag {
+            color: #0056b3;
+            margin-right: 8px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
 
         .related-area {
             padding: 20px;
             background-color: #fff;
-            border-top: 1px solid #ddd; 
-            flex-grow: 1; 
+            border-top: 1px solid #ddd;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
-        .related-title { font-size: 16px; font-weight: bold; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 15px; color: #555; }
-        .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; flex-grow: 1; }
-        .related-item { border: 1px solid #eee; padding: 5px; text-align: center; font-size: 11px; transition: opacity 0.2s; }
-        .related-item:hover { opacity: 0.8; border-color: #ccc; }
-        .related-item img { width: 100%; height: 70px; object-fit: cover; background: #eee; margin-bottom: 3px; }
-        .related-item a { color: #333; display: block; text-decoration: none; }
+
+        .related-title {
+            font-size: 16px;
+            font-weight: bold;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .related-item {
+            border: 1px solid #eee;
+            padding: 5px;
+            text-align: center;
+            font-size: 11px;
+            transition: opacity 0.2s;
+        }
+
+        .related-item:hover {
+            opacity: 0.8;
+            border-color: #ccc;
+        }
+
+        .related-item img {
+            width: 100%;
+            height: 70px;
+            object-fit: cover;
+            background: #eee;
+            margin-bottom: 3px;
+        }
+
+        .related-item a {
+            color: #333;
+            display: block;
+            text-decoration: none;
+        }
 
         /* モーダル */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.9); overflow: hidden; }
-        .modal-content-wrapper { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; cursor: grab; }
-        .modal-content-wrapper:active { cursor: grabbing; }
-        .modal img { max-width: 90%; max-height: 90%; transition: transform 0.05s linear; user-select: none; pointer-events: none; }
-        .modal-controls { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 1001; background: rgba(255, 255, 255, 0.2); padding: 10px; border-radius: 30px; }
-        .control-btn { background: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-weight: bold; color: #333; }
-        .control-btn:hover { background: #eee; }
-        .close-btn { position: fixed; top: 20px; right: 30px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 1001; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+        }
 
-        @media (max-width: 768px) { 
-            .container { flex-direction: column; } 
-            .image-section { border-right: none; border-bottom: 1px solid #ddd; padding: 20px; }
-            .image-grid { grid-template-columns: 1fr; } 
+        .modal-content-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: grab;
+        }
+
+        .modal-content-wrapper:active {
+            cursor: grabbing;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            transition: transform 0.05s linear;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .modal-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 30px;
+        }
+
+        .control-btn {
+            background: #fff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .control-btn:hover {
+            background: #eee;
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .image-section {
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+                padding: 20px;
+            }
+
+            .image-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -122,18 +327,54 @@
         <div class="info-section">
             <div class="section-title">書誌情報</div>
             <table class="info-table">
-                <tr><th>和文タイトル</th><td id="val-title-jp">-</td></tr>
-                <tr><th>英文タイトル</th><td id="val-title-en">-</td></tr>
-                <tr><th>整理番号</th><td id="val-ref">-</td></tr>
-                <tr><th>形態</th><td id="val-form">-</td></tr>
-                <tr><th>発行(和文)</th><td id="val-pub-jp">-</td></tr>
-                <tr><th>発行(英文)</th><td id="val-pub-en">-</td></tr>
-                <tr><th>使用/未使用</th><td id="val-usage">-</td></tr>
-                <tr><th>消印日時</th><td id="val-postmark">-</td></tr>
-                <tr><th>仕切り線位置</th><td id="val-divider">-</td></tr>
-                <tr><th>刷色</th><td id="val-color">-</td></tr>
-                <tr><th>備考</th><td id="val-remarks">-</td></tr>
-                <tr><th>キーワード</th><td id="val-keywords">-</td></tr>
+                <tr>
+                    <th>和文タイトル</th>
+                    <td id="val-title-jp">-</td>
+                </tr>
+                <tr>
+                    <th>英文タイトル</th>
+                    <td id="val-title-en">-</td>
+                </tr>
+                <tr>
+                    <th>整理番号</th>
+                    <td id="val-ref">-</td>
+                </tr>
+                <tr>
+                    <th>形態</th>
+                    <td id="val-form">-</td>
+                </tr>
+                <tr>
+                    <th>発行(和文)</th>
+                    <td id="val-pub-jp">-</td>
+                </tr>
+                <tr>
+                    <th>発行(英文)</th>
+                    <td id="val-pub-en">-</td>
+                </tr>
+                <tr>
+                    <th>使用/未使用</th>
+                    <td id="val-usage">-</td>
+                </tr>
+                <tr>
+                    <th>消印日時</th>
+                    <td id="val-postmark">-</td>
+                </tr>
+                <tr>
+                    <th>仕切り線位置</th>
+                    <td id="val-divider">-</td>
+                </tr>
+                <tr>
+                    <th>刷色</th>
+                    <td id="val-color">-</td>
+                </tr>
+                <tr>
+                    <th>備考</th>
+                    <td id="val-remarks">-</td>
+                </tr>
+                <tr>
+                    <th>キーワード</th>
+                    <td id="val-keywords">-</td>
+                </tr>
             </table>
 
             <div class="related-area">
@@ -157,18 +398,22 @@
         </div>
     </div>
 
+    <footer>
+        <p style="margin-top:20px; opacity:0.6;">&copy; 2026 Digital Archive Project. All Rights Reserved.</p>
+    </footer>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-             const firebaseConfig = {
-       apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
-       authDomain: "builderx-forik.firebaseapp.com",
-       projectId: "builderx-forik",
-       storageBucket: "builderx-forik.firebasestorage.app",
-       messagingSenderId: "704985970287",
-       appId: "1:704985970287:web:43924b7901b6f8f4df7f9a",
-    }; 
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
+            authDomain: "builderx-forik.firebaseapp.com",
+            projectId: "builderx-forik",
+            storageBucket: "builderx-forik.firebasestorage.app",
+            messagingSenderId: "704985970287",
+            appId: "1:704985970287:web:43924b7901b6f8f4df7f9a",
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -198,7 +443,7 @@
         function renderData(data) {
             const imgFront = document.getElementById('img-front');
             imgFront.src = data.imageUrlFront || "https://placehold.jp/300x200.png?text=NoImage";
-            
+
             if (data.imageUrlBack) {
                 document.getElementById('img-back').src = data.imageUrlBack;
                 document.getElementById('box-back').style.display = "block";
@@ -238,7 +483,7 @@
                     q = query(
                         collection(db, "items"),
                         where("keywords", "array-contains-any", searchKeywords),
-                        limit(7) 
+                        limit(7)
                     );
                 } else {
                     q = query(collection(db, "items"), limit(6));
@@ -252,7 +497,7 @@
                         const item = doc.data();
                         const title = item.title_jp || item.title || "タイトルなし";
                         const img = item.imageUrlFront || item.imageUrl || "https://placehold.jp/100x70.png?text=NoImage";
-                        
+
                         const html = `
                             <div class="related-item">
                                 <a href="detail.html?id=${doc.id}">
@@ -289,7 +534,7 @@
         window.zoomIn = () => { currentScale += 0.2; updateTransform(); };
         window.zoomOut = () => { if (currentScale > 0.4) { currentScale -= 0.2; updateTransform(); } };
         window.resetZoom = () => { currentScale = 1; currentX = 0; currentY = 0; updateTransform(); };
-        
+
         dragArea.addEventListener('wheel', (e) => { e.preventDefault(); if (e.deltaY < 0) window.zoomIn(); else window.zoomOut(); });
         dragArea.addEventListener('mousedown', (e) => { e.preventDefault(); isDragging = true; startX = e.clientX - currentX; startY = e.clientY - currentY; dragArea.style.cursor = "grabbing"; });
         window.addEventListener('mousemove', (e) => { if (!isDragging) return; e.preventDefault(); currentX = e.clientX - startX; currentY = e.clientY - startY; updateTransform(); });
@@ -298,4 +543,5 @@
         loadDetail();
     </script>
 </body>
+
 </html>

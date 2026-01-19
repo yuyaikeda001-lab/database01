@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>運営情報 | 歴史資料デジタルアーカイブ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Montserrat:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #0061ff, #60efff);
@@ -21,7 +24,7 @@
             font-family: "Montserrat", "Noto Sans JP", sans-serif;
             background-color: var(--bg-color);
             /* 背景にテック感のあるグリッドパターンを追加 */
-            background-image: 
+            background-image:
                 linear-gradient(rgba(0, 97, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 97, 255, 0.03) 1px, transparent 1px);
             background-size: 40px 40px;
@@ -44,16 +47,35 @@
             top: 0;
             z-index: 100;
         }
+
         .header-inner {
-            max-width: 1200px; margin: 0 auto; padding: 0 20px;
-            display: flex; justify-content: space-between; align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .site-name { 
-            font-size: 22px; font-weight: 700; letter-spacing: 0.05em;
-            background: linear-gradient(45deg, #111, #444); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+
+        .site-name {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            background: linear-gradient(45deg, #111, #444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .site-name a { text-decoration: none; }
-        .site-sub { font-size: 11px; color: #888; letter-spacing: 2px; text-transform: uppercase;}
+
+        .site-name a {
+            text-decoration: none;
+        }
+
+        .site-sub {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
 
         /* --- コンテンツエリア --- */
         .container {
@@ -64,12 +86,27 @@
             flex: 1;
         }
 
-        .page-header { text-align: center; margin-bottom: 60px; }
-        .page-title {
-            font-size: 36px; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 10px;
-            background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
         }
-        .page-subtitle { font-size: 14px; color: #888; letter-spacing: 3px; text-transform: uppercase; }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #888;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
 
         /* --- グラスモーフィズムパネル --- */
         .glass-panel {
@@ -83,21 +120,41 @@
             position: relative;
             overflow: hidden;
         }
+
         /* パネル左側の青いアクセントバー */
         .glass-panel::before {
-            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
             background: var(--primary-gradient);
         }
 
         .panel-title {
-            font-size: 18px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             color: #333;
         }
+
         .panel-title::after {
-            content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, #ddd, transparent);
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, #ddd, transparent);
         }
-        
-        .panel-content p { font-size: 14px; color: #555; margin-bottom: 15px; text-align: justify; }
+
+        .panel-content p {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
 
         /* --- データリスト（スペック表のようなデザイン） --- */
         .spec-list {
@@ -107,44 +164,89 @@
             font-size: 14px;
             margin-top: 20px;
         }
+
         .spec-label {
-            font-weight: 600; color: #0061ff; text-align: right; padding-right: 15px;
+            font-weight: 600;
+            color: #0061ff;
+            text-align: right;
+            padding-right: 15px;
             border-right: 1px solid #ddd;
         }
-        .spec-value { color: #444; }
+
+        .spec-value {
+            color: #444;
+        }
 
         /* --- 戻るボタン --- */
-        .back-btn-area { text-align: center; margin-top: 50px; }
+        .back-btn-area {
+            text-align: center;
+            margin-top: 50px;
+        }
+
         .btn-back {
-            display: inline-flex; align-items: center; gap: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 12px 30px;
             border: 1px solid #ccc;
             border-radius: 30px;
             background: #fff;
             color: #555;
-            font-size: 13px; font-weight: 600;
+            font-size: 13px;
+            font-weight: 600;
             transition: all 0.3s;
             text-decoration: none;
         }
+
         .btn-back:hover {
-            border-color: #0061ff; color: #0061ff; box-shadow: 0 5px 15px rgba(0, 97, 255, 0.1);
+            border-color: #0061ff;
+            color: #0061ff;
+            box-shadow: 0 5px 15px rgba(0, 97, 255, 0.1);
         }
 
         /* --- フッター --- */
         footer {
-            background: #1a1a1a; color: #777; text-align: center; padding: 40px 0;
-            font-size: 12px; margin-top: auto; border-top: 1px solid #333;
+            background: #1a1a1a;
+            color: #777;
+            text-align: center;
+            padding: 40px 0;
+            font-size: 12px;
+            margin-top: auto;
+            border-top: 1px solid #333;
         }
-        footer a { color: #aaa; margin: 0 10px; text-decoration: none; transition: color 0.3s; }
-        footer a:hover { color: #fff; }
+
+        footer a {
+            color: #aaa;
+            margin: 0 10px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        footer a:hover {
+            color: #fff;
+        }
 
         @media (max-width: 768px) {
-            .spec-list { grid-template-columns: 1fr; gap: 5px; }
-            .spec-label { text-align: left; border-right: none; color: #888; font-size: 12px; }
-            .spec-value { margin-bottom: 10px; font-weight: 500; }
+            .spec-list {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .spec-label {
+                text-align: left;
+                border-right: none;
+                color: #888;
+                font-size: 12px;
+            }
+
+            .spec-value {
+                margin-bottom: 10px;
+                font-weight: 500;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <header>
@@ -216,8 +318,9 @@
     </div>
 
     <footer>
-        <p style="margin-top:20px; opacity:0.6;">&copy; 2025 Digital Archive Project. All Rights Reserved.</p>
+        <p style="margin-top:20px; opacity:0.6;">&copy; 2026 Digital Archive Project. All Rights Reserved.</p>
     </footer>
 
 </body>
+
 </html>
