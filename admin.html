@@ -449,6 +449,38 @@
         .log-action.DELETE {
             color: #d93025;
         }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #888;
+        }
+
+        .filter-input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 13px;
+        }
     </style>
 </head>
 
@@ -548,6 +580,34 @@
                 <header>
                     <h1>History Log</h1>
                 </header>
+
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label class="filter-label">DATE</label>
+                        <input type="date" id="filter-date" class="filter-input">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">USER / DOMAIN</label>
+                        <input type="text" id="filter-user" class="filter-input" placeholder="email or domain...">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">ACTION</label>
+                        <select id="filter-action" class="filter-input" style="width: 120px;">
+                            <option value="">All Actions</option>
+                            <option value="CREATE">CREATE</option>
+                            <option value="UPDATE">UPDATE</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="justify-content: flex-end;">
+                        <button class="btn-sm btn-edit" id="btn-apply-filter"
+                            style="height: 38px; margin-top: auto;">Apply Filter</button>
+                    </div>
+                    <div class="filter-group" style="justify-content: flex-end;">
+                        <button class="btn-sm" id="btn-reset-filter"
+                            style="height: 38px; margin-top: auto; background: #eee; color: #555;">Reset</button>
+                    </div>
+                </div>
                 <div class="data-table-container" style="padding:0;">
                     <div id="log-list">
                         <!-- JS will populate -->
@@ -770,18 +830,57 @@
         });
 
         // --- HISTORY ---
-        async function loadHistory() {
+        async function loadHistory(dbQueryOpts = null) {
             const list = document.getElementById('log-list');
+            list.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">Loading logs...</div>';
+
             try {
-                const q = query(collection(db, LOGS_COLLECTION), orderBy("timestamp", "desc"), limit(50));
-                const querySnapshot = await getDocs(q);
-                list.innerHTML = '';
-                if (querySnapshot.empty) {
-                    list.innerHTML = '<div style="padding:20px; text-align:center;">No logs found.</div>';
-                    return;
+                // Base Query
+                let constraints = [orderBy("timestamp", "desc"), limit(100)]; // Default limit 100
+
+                // Apply DB Filters if provided (Date essentially)
+                if (dbQueryOpts && dbQueryOpts.date) {
+                    const [y, m, d] = dbQueryOpts.date.split('-').map(Number);
+                    // Create local dates
+                    const start = new Date(y, m - 1, d, 0, 0, 0, 0);
+                    const end = new Date(y, m - 1, d, 23, 59, 59, 999);
+
+                    // Note: Firestore inequalities must be on the same field as the first orderBy if using orderBy.
+                    // Here we order by timestamp, so we can filter by timestamp.
+                    constraints.push(where("timestamp", ">=", start));
+                    constraints.push(where("timestamp", "<=", end));
                 }
+
+                const q = query(collection(db, LOGS_COLLECTION), ...constraints);
+                const querySnapshot = await getDocs(q);
+
+                // Client-side Filtering
+                const userFilter = dbQueryOpts?.user ? dbQueryOpts.user.toLowerCase() : "";
+                const actionFilter = dbQueryOpts?.action || "";
+
+                list.innerHTML = '';
+
+                let count = 0;
+                let logs = [];
+
                 querySnapshot.forEach(docSnap => {
                     const data = docSnap.data();
+                    logs.push(data);
+                });
+
+                // Apply in-memory filters
+                const filteredLogs = logs.filter(data => {
+                    if (userFilter && !data.user.toLowerCase().includes(userFilter)) return false;
+                    if (actionFilter && data.action !== actionFilter) return false;
+                    return true;
+                });
+
+                if (filteredLogs.length === 0) {
+                    list.innerHTML = '<div style="padding:20px; text-align:center;">No logs found matching criteria.</div>';
+                    return;
+                }
+
+                filteredLogs.forEach(data => {
                     const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : 'Using Server Date';
                     const item = document.createElement('div');
                     item.className = 'log-item';
@@ -795,10 +894,32 @@
                     `;
                     list.appendChild(item);
                 });
+
             } catch (e) {
+                console.error(e);
                 list.innerHTML = `<div style="padding:20px; color:red;">Error: ${e.message}</div>`;
             }
         }
+
+        // Attach Filter Listeners
+        document.getElementById('btn-apply-filter').addEventListener('click', () => {
+            const dateVal = document.getElementById('filter-date').value;
+            const userVal = document.getElementById('filter-user').value.trim();
+            const actionVal = document.getElementById('filter-action').value;
+
+            loadHistory({
+                date: dateVal || null,
+                user: userVal || null,
+                action: actionVal || null
+            });
+        });
+
+        document.getElementById('btn-reset-filter').addEventListener('click', () => {
+            document.getElementById('filter-date').value = '';
+            document.getElementById('filter-user').value = '';
+            document.getElementById('filter-action').value = '';
+            loadHistory();
+        });
     </script>
 </body>
 
