@@ -118,6 +118,8 @@
             padding: 0;
             display: flex;
             flex-direction: column;
+            min-width: 0;
+            /* Flexboxの子要素がはみ出さないようにする対策 */
         }
 
         .info-table {
@@ -334,7 +336,8 @@
                 </h3>
                 <div id="val-transcription" style="
                     width: 100%; 
-                    min-height: 200px; 
+                    min-height: 200px;
+                    max-height: 600px;
                     writing-mode: vertical-rl; 
                     font-family: 'Yu Mincho', serif; 
                     line-height: 2.0; 
@@ -342,6 +345,7 @@
                     white-space: pre-wrap; 
                     overflow-x: auto;
                     padding: 10px;
+                    border: 1px solid＃eee;
                 "></div>
             </div>
 
