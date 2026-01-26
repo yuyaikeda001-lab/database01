@@ -404,7 +404,7 @@
         async function loadData() {
             const listArea = document.getElementById('list-area');
             try {
-                const q = query(collection(db, "items"), orderBy("refNo"));
+                const q = query(collection(db, "items2"), orderBy("refNo"));
                 const querySnapshot = await getDocs(q);
 
                 allData = [];
