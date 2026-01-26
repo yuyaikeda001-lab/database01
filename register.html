@@ -155,13 +155,35 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="affiliation">所属 (必須)</label>
-                    <input type="text" id="affiliation" required placeholder="例: ○○大学 歴史学部">
+                    <label for="university">大学・教育機関名 (必須)</label>
+                    <input type="text" id="university" required placeholder="例: ○○大学 歴史学部">
+                    <p style="font-size:11px; color:#666; margin-top:5px;">※ac.jpドメインのメールアドレスに紐づく機関名を入力してください。</p>
                 </div>
 
                 <div class="form-group">
-                    <label for="phone">電話番号 (必須)</label>
-                    <input type="tel" id="phone" required placeholder="例: 090-1234-5678">
+                    <label for="specialization">専門分野 (必須)</label>
+                    <select id="specialization" required
+                        style="width:100%; padding:10px; border:1px solid #bdc3c7; border-radius:4px;"
+                        onchange="toggleSpecialization()">
+                        <option value="">選択してください</option>
+                        <option value="日本史">日本史 (Japanese History)</option>
+                        <option value="東洋史">東洋史 (Asian History)</option>
+                        <option value="西洋史">西洋史 (Western History)</option>
+                        <option value="社会学">社会学 (Sociology)</option>
+                        <option value="経済学">経済学 (Economics)</option>
+                        <option value="政治学">政治学 (Political Science)</option>
+                        <option value="その他">その他 (Other)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="spec-other-container" style="display:none;">
+                    <label for="specialization_other">専門分野詳細 (その他)</label>
+                    <input type="text" id="specialization_other" placeholder="具体的な分野を入力してください">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">電話番号 (任意)</label>
+                    <input type="tel" id="phone" placeholder="不要">
                 </div>
 
                 <div class="form-group">
@@ -256,7 +278,13 @@
             if (!currentUser) return;
 
             const name = document.getElementById('name').value;
-            const affiliation = document.getElementById('affiliation').value;
+            const university = document.getElementById('university').value;
+            // Get specialization
+            let spec = document.getElementById('specialization').value;
+            if (spec === 'その他') {
+                spec = document.getElementById('specialization_other').value;
+            }
+
             const phone = document.getElementById('phone').value;
             const purpose = document.getElementById('purpose').value;
             const btn = document.getElementById('submit-btn');
@@ -266,18 +294,18 @@
 
             try {
                 // Save to allowed_users with pending status
-                // We use setDoc with merge: true to avoid overwriting if something exists but incomplete
                 await setDoc(doc(db, "allowed_users", currentUser.uid), {
                     email: currentUser.email,
                     displayName: currentUser.displayName,
                     photoURL: currentUser.photoURL,
                     name: name,
-                    affiliation: affiliation,
+                    university: university, // Changed from affiliation
+                    specialization: spec,   // New field
                     phone: phone,
                     purpose: purpose,
-                    status: 'pending', // Key field for approval
+                    status: 'pending',
                     appliedAt: serverTimestamp(),
-                    roles: { admin: false, uploader: true } // Default requested roles
+                    roles: { admin: false, uploader: true }
                 }, { merge: true });
 
                 // Also purely for searching by email (legacy support), we might want to ensure a query works.
