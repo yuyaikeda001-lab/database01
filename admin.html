@@ -507,6 +507,10 @@
                 <div class="nav-item active" data-target="view-data">
                     <span>📁</span> データ管理
                 </div>
+                <div class="nav-item" data-target="view-applications">
+                    <span>📩</span> 利用申請 <span id="badge-applications"
+                        style="background:red; color:white; font-size:10px; padding:2px 6px; border-radius:10px; display:none; margin-left:auto;">0</span>
+                </div>
                 <div class="nav-item" data-target="view-accounts">
                     <span>👥</span> アカウント管理
                 </div>
@@ -531,7 +535,7 @@
                     <div style="display:flex; gap:10px; align-items:center;">
                         <select id="db-selector" style="padding:8px; border-radius:5px; border:1px solid #ccc;">
                             <option value="items">高田保馬 (Default)</option>
-                            <!-- Future databases can be added here -->
+                            <option value="items2">New Collection</option>
                         </select>
                         <button class="btn-add" onclick="window.location.href='upload.html'">
                             <span>+</span> 新規登録
@@ -556,6 +560,32 @@
                             <tr>
                                 <td colspan="6" style="text-align:center; padding:30px;">Loading...</td>
                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Applications (New) -->
+            <section id="view-applications" class="view-section">
+                <header>
+                    <div>
+                        <h1>Applications</h1>
+                        <p style="color:#999; font-size:13px; margin-top:5px;">新規利用申請の承認・承認待ち一覧</p>
+                    </div>
+                </header>
+                <div class="data-table-container">
+                    <table id="app-table">
+                        <thead>
+                            <tr>
+                                <th>Name / Email</th>
+                                <th>Affiliation</th>
+                                <th>Purpose</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="app-list-body">
+                            <!-- JS will populate -->
                         </tbody>
                     </table>
                 </div>
@@ -738,10 +768,88 @@
                 document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
                 document.getElementById(target).classList.add('active');
                 if (target === 'view-data') loadItems();
+                if (target === 'view-applications') loadApplications();
                 if (target === 'view-accounts') loadAccounts();
                 if (target === 'view-history') loadHistory();
             });
         });
+
+        // --- APPLICATIONS ---
+        async function loadApplications() {
+            const tbody = document.getElementById('app-list-body');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>';
+            try {
+                const q = query(collection(db, USERS_COLLECTION), where("status", "==", "pending"));
+                const querySnapshot = await getDocs(q);
+                tbody.innerHTML = '';
+
+                // Badge update
+                const badge = document.getElementById('badge-applications');
+                if (!querySnapshot.empty) {
+                    badge.style.display = "inline-block";
+                    badge.innerText = querySnapshot.size;
+                } else {
+                    badge.style.display = "none";
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:#999;">承認待ちの申請はありません。</td></tr>';
+                }
+
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const tr = document.createElement('tr');
+                    const dateStr = data.appliedAt ? new Date(data.appliedAt.toDate()).toLocaleString() : "-";
+                    tr.innerHTML = `
+                        <td>
+                            <div style="font-weight:bold;">${data.name || 'No Name'}</div>
+                            <div style="font-size:11px; color:#888;">${data.email}</div>
+                        </td>
+                        <td>${data.affiliation || '-'}</td>
+                        <td style="font-size:12px; max-width:200px;">${data.purpose || '-'}</td>
+                        <td style="font-size:11px;">${dateStr}</td>
+                        <td>
+                            <button onclick="window.approveUser('${docSnap.id}', '${data.email}')" class="btn-sm" style="background:#1e8e3e; color:white; margin-right:5px;">Approve</button>
+                            <button onclick="window.rejectUser('${docSnap.id}')" class="btn-sm" style="background:#d93025; color:white;">Reject</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="5" style="color:red;">Error: ${e.message}</td></tr>`;
+            }
+        }
+
+        window.approveUser = async (uid, email) => {
+            if (!confirm(`Make ${email} an approved user?`)) return;
+            try {
+                // Determine if updating by doc ID (new system) or adding new doc (old system fallback)
+                // In register.html we used UID as Doc ID.
+                await updateDoc(doc(db, USERS_COLLECTION, uid), {
+                    status: 'approved',
+                    approvedAt: serverTimestamp(),
+                    approvedBy: auth.currentUser.email
+                });
+                logActivity('APPROVE', `Approved user ${email}`, uid);
+                loadApplications();
+                loadAccounts(); // Refresh accounts too if needed
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        };
+
+        window.rejectUser = async (uid) => {
+            if (!confirm(`Reject this application?`)) return;
+            try {
+                await updateDoc(doc(db, USERS_COLLECTION, uid), {
+                    status: 'rejected',
+                    rejectedAt: serverTimestamp(),
+                    rejectedBy: auth.currentUser.email
+                });
+                logActivity('REJECT', `Rejected user application`, uid);
+                loadApplications();
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        };
 
         // Database Selector Listener
         const dbSelector = document.getElementById('db-selector');
@@ -773,7 +881,7 @@
                         <td><span class="status-badge ${statusClass}">${data.usage_status || 'Unknown'}</span></td>
                         <td style="font-size:11px; color:#999;">${data.lastEditor || data.uploader || '-'}</td>
                         <td class="action-row">
-                            <a href="edit.html?id=${docSnap.id}" class="btn-sm btn-edit">Edit</a>
+                            <a href="edit.html?id=${docSnap.id}&collection=${collectionName}" class="btn-sm btn-edit">Edit</a>
                         </td>
                     `;
                     tbody.appendChild(tr);
@@ -801,18 +909,28 @@
                         </div>
                     `;
                 }
+
                 querySnapshot.forEach(docSnap => {
                     const data = docSnap.data();
-                    const card = document.createElement('div');
-                    card.className = 'account-card';
-                    card.innerHTML = `
+                    if (data.status === 'rejected') return;
+
+                    const div = document.createElement('div');
+                    div.className = 'account-card';
+                    const badgeColor = data.status === 'pending' ? 'orange' : (data.status === 'approved' ? 'green' : '#999');
+                    const statusText = data.status || 'legacy';
+
+                    div.innerHTML = `
                         <div class="account-info">
-                            <span class="account-email">${data.email}</span>
-                            <span class="account-role">Added: ${new Date(data.addedAt?.toDate()).toLocaleDateString()}</span>
+                            <div class="account-email">${data.email}</div>
+                            <div style="font-weight:bold; font-size:13px; margin-top:2px;">${data.name || ''}</div>
+                            <div class="account-role">${data.affiliation || ''}</div>
+                            <div style="margin-top:5px;">
+                                <span class="status-badge" style="background:${badgeColor}; color:white;">${statusText}</span>
+                            </div>
                         </div>
-                        <button class="btn-icon" onclick="removeAccount('${docSnap.id}', '${data.email}')">🗑️</button>
+                        <button class="btn-icon" onclick="window.deleteAccount('${docSnap.id}', '${data.email}')">🗑️</button>
                     `;
-                    list.appendChild(card);
+                    list.appendChild(div);
                 });
             } catch (e) {
                 list.innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;

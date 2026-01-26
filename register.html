@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>利用申請 | 歴史資料デジタルアーカイブ</title>
+    <style>
+        body {
+            font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", serif;
+            background-color: #f5f7fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        p.subtitle {
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #34495e;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-google {
+            background-color: #fff;
+            color: #757575;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-google:hover {
+            background-color: #f1f1f1;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            text-align: center;
+            color: #27ae60;
+        }
+
+        .login-section {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="main-container">
+        <h1>利用申請</h1>
+        <p class="subtitle">データベースの編集・管理を行うためのアカウント申請フォームです。</p>
+
+        <!-- Step 1: Google Login -->
+        <div id="step-login" class="login-section">
+            <p style="margin-bottom:20px;">まずはGoogleアカウントで本人確認を行ってください。</p>
+            <button class="btn btn-google" onclick="handleGoogleLogin()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+                Googleでログイン
+            </button>
+        </div>
+
+        <!-- Step 2: Application Form -->
+        <div id="step-form" class="hidden">
+            <p id="user-email-display" style="text-align:center; margin-bottom:20px; font-weight:bold; color:#2980b9;">
+            </p>
+
+            <form id="application-form">
+                <div class="form-group">
+                    <label for="name">氏名 (必須)</label>
+                    <input type="text" id="name" required placeholder="例: 山田 太郎">
+                </div>
+
+                <div class="form-group">
+                    <label for="affiliation">所属 (必須)</label>
+                    <input type="text" id="affiliation" required placeholder="例: ○○大学 歴史学部">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">電話番号 (必須)</label>
+                    <input type="tel" id="phone" required placeholder="例: 090-1234-5678">
+                </div>
+
+                <div class="form-group">
+                    <label for="purpose">利用目的・担当業務 (必須)</label>
+                    <textarea id="purpose" required placeholder="例: ○○資料のデジタルアーカイブ化作業のため"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submit-btn">申請を送る</button>
+            </form>
+        </div>
+
+        <!-- Step 3: Success -->
+        <div id="step-success" class="hidden success-message">
+            <h2>申請を受け付けました</h2>
+            <p>管理者の承認をお待ちください。<br>承認されるとメール等で連絡が届く場合があります。</p>
+            <p style="margin-top:20px;"><a href="index.html">トップページへ戻る</a></p>
+        </div>
+
+        <p id="error-display" class="error-msg"></p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7UvBVllUkx5pSOk8DMc6Y3MNbTWELJzA",
+            authDomain: "builderx-forik.firebaseapp.com",
+            projectId: "builderx-forik",
+            storageBucket: "builderx-forik.firebasestorage.app",
+            messagingSenderId: "704985970287",
+            appId: "1:704985970287:web:43924b7901b6f8f4df7f9a",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+
+        window.handleGoogleLogin = () => {
+            signInWithPopup(auth, provider).catch((error) => {
+                document.getElementById('error-display').innerText = "ログインエラー: " + error.message;
+            });
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // Check if already registered
+                const userDocRef = doc(db, "allowed_users", user.uid); // Use UID as doc ID for stability
+                // Note: Previous system might check email queries, we should migrate to UID based or support both.
+                // For now, let's check if there is an entry with this email in the collection to be safe, 
+                // but for new registrations we strictly use this flow.
+
+                document.getElementById('step-login').classList.add('hidden');
+                document.getElementById('step-form').classList.remove('hidden');
+                document.getElementById('user-email-display').innerText = "申請アカウント: " + user.email;
+
+                try {
+                    const docSnap = await getDoc(userDocRef);
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.status === 'approved') {
+                            document.querySelector('.container').innerHTML = `
+                                <div class="success-message">
+                                    <h2>既に承認されています</h2>
+                                    <p>あなたは既に管理者として承認されています。</p>
+                                    <p><a href="admin.html">管理画面へ移動</a></p>
+                                </div>
+                            `;
+                        } else if (data.status === 'pending') {
+                            document.getElementById('step-form').classList.add('hidden');
+                            document.getElementById('step-success').classList.remove('hidden');
+                            document.querySelector('#step-success h2').innerText = "申請中です";
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+
+            } else {
+                document.getElementById('step-login').classList.remove('hidden');
+                document.getElementById('step-form').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('application-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const name = document.getElementById('name').value;
+            const affiliation = document.getElementById('affiliation').value;
+            const phone = document.getElementById('phone').value;
+            const purpose = document.getElementById('purpose').value;
+            const btn = document.getElementById('submit-btn');
+
+            btn.disabled = true;
+            btn.innerText = "送信中...";
+
+            try {
+                // Save to allowed_users with pending status
+                // We use setDoc with merge: true to avoid overwriting if something exists but incomplete
+                await setDoc(doc(db, "allowed_users", currentUser.uid), {
+                    email: currentUser.email,
+                    displayName: currentUser.displayName,
+                    photoURL: currentUser.photoURL,
+                    name: name,
+                    affiliation: affiliation,
+                    phone: phone,
+                    purpose: purpose,
+                    status: 'pending', // Key field for approval
+                    appliedAt: serverTimestamp(),
+                    roles: { admin: false, uploader: true } // Default requested roles
+                }, { merge: true });
+
+                // Also purely for searching by email (legacy support), we might want to ensure a query works.
+                // But UID doc ID is better. We will update admin.html to read all.
+
+                document.getElementById('step-form').classList.add('hidden');
+                document.getElementById('step-success').classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('error-display').innerText = "送信エラー: " + error.message;
+                btn.disabled = false;
+                btn.innerText = "申請を送る";
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -334,14 +334,23 @@
         async function checkPermission(user) {
             if (!user) return false;
 
-            // 1. Domain Check for Editors (Allow all ac.jp)
-            if (user.email.endsWith(ALLOWED_DOMAIN)) return true;
-
+            // 1. Check if user is explicitly allowed in database
             try {
-                // 2. Database Check (Explicitly allowed users)
                 const q = query(collection(db, USERS_COLLECTION), where("email", "==", user.email));
                 const snapshot = await getDocs(q);
-                if (!snapshot.empty) return true;
+
+                if (!snapshot.empty) {
+                    const data = snapshot.docs[0].data();
+                    // Must be approved
+                    if (data.status === 'approved') return true;
+                    // Legacy support
+                    if (!data.status) return true;
+                    return false;
+                }
+
+                // 2. Domain Check for Editors (Allow all ac.jp)
+                // Fallback for domain users if they are NOT in the allowed_users (rejected users are blocked above if they are in the list)
+                if (user.email.endsWith(ALLOWED_DOMAIN)) return true;
 
                 // 3. Fallback for bootstrap
                 const allUsersQ = query(collection(db, USERS_COLLECTION), limit(1));
@@ -367,6 +376,7 @@
 
         const params = new URLSearchParams(window.location.search);
         const docId = params.get('id');
+        const collectionName = params.get('collection') || "items"; // Default to 'items'
 
         // 入力制限
         const refInput = document.getElementById('refNo');
@@ -416,7 +426,7 @@
         async function loadDataForEdit() {
             if (!docId) { alert("エラー: IDが指定されていません"); return; }
             try {
-                const docRef = doc(db, "items", docId);
+                const docRef = doc(db, collectionName, docId);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
@@ -506,7 +516,7 @@
                 }
 
                 status.innerText = "データベース更新中...";
-                const docRef = doc(db, "items", docId);
+                const docRef = doc(db, collectionName, docId);
                 await updateDoc(docRef, updateData);
 
 
@@ -547,10 +557,10 @@
                 }
 
                 // 2. データベースのドキュメントを削除
-                await deleteDoc(doc(db, "items", docId));
+                await deleteDoc(doc(db, collectionName, docId));
 
                 // LOG
-                logActivity('DELETE', `Deleted item ${currentData.refNo || 'Unknown'}`, docId);
+                logActivity('DELETE', `Deleted item ${currentData.refNo} from ${collectionName}`, docId);
 
                 alert("削除しました。一覧ページに戻ります。");
                 window.location.href = "admin.html";

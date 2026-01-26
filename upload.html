@@ -158,6 +158,13 @@
         </div>
 
         <form id="uploadForm">
+            <!-- DB Select -->
+            <label>登録先データベース</label>
+            <select id="target_collection" style="background:#eef; border:1px solid #aaf;">
+                <option value="items">高田保馬 (Default)</option>
+                <option value="items2">New Collection</option>
+            </select>
+
             <div style="display:flex; gap:20px;">
                 <div style="flex:1;">
                     <label class="required">整理番号</label>
@@ -300,15 +307,31 @@
         async function checkPermission(user) {
             if (!user) return false;
 
-            // 1. Domain Check for Uploaders (Allow all ac.jp)
-            if (user.email.endsWith(ALLOWED_DOMAIN)) return true;
-
+            // 1. Check if user is explicitly allowed in database
             try {
+                // Check if doc exists with UID (new system) or Email (legacy)
+                // We'll query by email for broad compatibility
                 const q = query(collection(db, USERS_COLLECTION), where("email", "==", user.email));
                 const snapshot = await getDocs(q);
-                if (!snapshot.empty) return true;
 
-                // Fallback for bootstrap
+                if (!snapshot.empty) {
+                    const data = snapshot.docs[0].data();
+                    // New System: Must be approved
+                    if (data.status === 'approved') return true;
+                    // Legacy System: if no status field but exists -> assume allow
+                    if (!data.status) return true;
+
+                    // If rejected or pending -> false
+                    return false;
+                }
+
+                // 2. Domain Check for Uploaders (Allow all ac.jp) - ONLY if not explicitly rejected?
+                // For now, let's keep the domain check as a fallback for users NOT in the allowed_users table.
+                // But if they are in the table as 'rejected', they should be blocked.
+                // WE already checked table above.
+                if (user.email.endsWith(ALLOWED_DOMAIN)) return true;
+
+                // Fallback for bootstrap (only if collection is empty)
                 const allUsersQ = query(collection(db, USERS_COLLECTION), limit(1));
                 const allUsersSnap = await getDocs(allUsersQ);
                 if (allUsersSnap.empty) return true;
@@ -428,10 +451,11 @@
                     uploader: auth.currentUser.email
                 };
 
-                const docRef = await addDoc(collection(db, "items"), newData);
+                const collectionName = document.getElementById('target_collection').value;
+                const docRef = await addDoc(collection(db, collectionName), newData);
 
                 // LOG
-                logActivity('CREATE', `Created item ${newData.refNo} (${newData.title_jp})`, docRef.id);
+                logActivity('CREATE', `Created item ${newData.refNo} in ${collectionName}`, docRef.id);
 
                 status.innerText = "登録完了！"; status.style.color = "green";
                 document.getElementById('uploadForm').reset();
