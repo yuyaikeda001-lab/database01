@@ -525,16 +525,25 @@
 
         async function checkPermission(user) {
             try {
-                // 1. Check allowed_users
+                // 1. Check if this specific user is explicitly approved
                 const q = query(collection(db, USERS_COLLECTION), where("email", "==", user.email));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
                     const data = snap.docs[0].data();
-                    return data.status === 'approved'; // Must be approved
+                    if (data.status === 'approved') return true;
+                    // If found but not approved, continues to check if ANY admins exist (Bootstrap)
                 }
-                // 2. Fallback Bootstrap (if empty)
-                const allQ = query(collection(db, USERS_COLLECTION), limit(1));
-                if ((await getDocs(allQ)).empty) return true;
+
+                // 2. Bootstrap Mode: Access is allowed if NO approved admins exist in the entire system.
+                // This prevents lockout when first users register (creating pending docs) but no admin exists to approve them.
+                const qAnyApproved = query(collection(db, USERS_COLLECTION), where("status", "==", "approved"), limit(1));
+                const snapAny = await getDocs(qAnyApproved);
+
+                if (snapAny.empty) {
+                    console.log("Bootstrap Mode: No approved admins found. Allowing access.");
+                    return true;
+                }
+
                 return false;
             } catch (e) { console.error(e); return false; }
         }
