@@ -520,7 +520,7 @@
         });
 
         document.getElementById('btn-login').addEventListener('click', () => {
-            signInWithPopup(auth, provider).catch(e => document.getElementById('login-error').innerText = e.message);
+            signInWithRedirect(auth, provider);
         });
 
         async function checkPermission(user) {
