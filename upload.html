@@ -395,6 +395,22 @@
 
         window.logout = () => { signOut(auth); };
 
+        // Handle URL Params for Collection
+        const urlParams = new URLSearchParams(window.location.search);
+        const colParam = urlParams.get('collection');
+        if (colParam) {
+            const sel = document.getElementById('target_collection');
+            if (sel) {
+                sel.value = colParam;
+                // If the value was valid (exists in options), disable it to lock choice
+                if (sel.value === colParam) {
+                    sel.disabled = true;
+                    // Create hidden input to ensure value is submitted if disabled inputs aren't? 
+                    // Actually we read .value in JS, so disabled is fine as long as we don't rely on form submit event's default FormData (we don't).
+                }
+            }
+        }
+
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
