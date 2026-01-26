@@ -581,27 +581,33 @@
                 const snapAny = await getDocs(qAnyApproved);
                 if (snapAny.empty) {
                     console.log("Bootstrap Mode: No approved admins found. Allowing access as Admin.");
-                    return null; // Not allowed
-                } catch (e) { console.error(e); return null; }
+                    return { status: 'approved', roles: { admin: true, uploader: true } };
+                }
+
+                return null; // Not allowed
+            } catch (e) {
+                console.error(e);
+                return null;
             }
+        }
 
         // --- LOADERS ---
 
         // 1. Data
         async function loadItems() {
-                const collectionName = document.getElementById('db-selector').value;
-                const tbody = document.getElementById('item-list-body');
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#999;">Loading...</td></tr>';
+            const collectionName = document.getElementById('db-selector').value;
+            const tbody = document.getElementById('item-list-body');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px; color:#999;">Loading...</td></tr>';
 
-                try {
-                    const q = query(collection(db, collectionName), orderBy("refNo"));
-                    const snap = await getDocs(q);
-                    tbody.innerHTML = '';
+            try {
+                const q = query(collection(db, collectionName), orderBy("refNo"));
+                const snap = await getDocs(q);
+                tbody.innerHTML = '';
 
-                    snap.forEach(docSnap => {
-                        const data = docSnap.data();
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                         <td>${data.imageUrlFront ? `<img src="${data.imageUrlFront}" style="width:40px; height:40px; object-fit:cover; border-radius:5px;">` : ''}</td>
                         <td style="font-weight:600;">${data.refNo || '-'}</td>
                         <td>${data.title_jp}</td>
@@ -611,37 +617,37 @@
                             <button class="btn-action btn-nav" onclick="window.location.href='edit.html?id=${docSnap.id}&collection=${collectionName}'">Edit</button>
                         </td>
                     `;
-                        tbody.appendChild(tr);
-                    });
-                } catch (e) { console.error(e); tbody.innerHTML = `<tr><td colspan="6">Error: ${e.message}</td></tr>`; }
-            }
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); tbody.innerHTML = `<tr><td colspan="6">Error: ${e.message}</td></tr>`; }
+        }
 
-            document.getElementById('db-selector').addEventListener('change', loadItems);
+        document.getElementById('db-selector').addEventListener('change', loadItems);
 
-            // 2. Applications
-            async function loadApplications() {
-                const tbody = document.getElementById('app-list-body');
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Loading...</td></tr>';
+        // 2. Applications
+        async function loadApplications() {
+            const tbody = document.getElementById('app-list-body');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Loading...</td></tr>';
 
-                try {
-                    const q = query(collection(db, USERS_COLLECTION), where("status", "==", "pending"));
-                    const snap = await getDocs(q);
-                    tbody.innerHTML = '';
+            try {
+                const q = query(collection(db, USERS_COLLECTION), where("status", "==", "pending"));
+                const snap = await getDocs(q);
+                tbody.innerHTML = '';
 
-                    // Badge
-                    const badge = document.getElementById('badge-applications');
-                    if (!snap.empty) {
-                        badge.style.display = 'inline-block';
-                        badge.innerText = snap.size;
-                    } else {
-                        badge.style.display = 'none';
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#999;">No pending applications.</td></tr>';
-                    }
+                // Badge
+                const badge = document.getElementById('badge-applications');
+                if (!snap.empty) {
+                    badge.style.display = 'inline-block';
+                    badge.innerText = snap.size;
+                } else {
+                    badge.style.display = 'none';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px; color:#999;">No pending applications.</td></tr>';
+                }
 
-                    snap.forEach(docSnap => {
-                        const data = docSnap.data();
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                         <td>
                             <div style="font-weight:bold;">${data.name}</div>
                             <div style="font-size:11px; color:#999;">${data.email}</div>
@@ -658,38 +664,38 @@
                             <button class="btn-action btn-danger" onclick="rejectUser('${docSnap.id}')">Reject</button>
                         </td>
                     `;
-                        tbody.appendChild(tr);
-                    });
-                } catch (e) { console.error(e); }
-            }
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); }
+        }
 
-            window.approveUser = async (uid) => {
-                if (!confirm("Approve this user?")) return;
-                await updateDoc(doc(db, USERS_COLLECTION, uid), { status: 'approved', approvedAt: serverTimestamp() });
-                loadApplications(); loadAccounts();
-            }
-            window.rejectUser = async (uid) => {
-                if (!confirm("Reject this user?")) return;
-                await updateDoc(doc(db, USERS_COLLECTION, uid), { status: 'rejected', rejectedAt: serverTimestamp() });
-                loadApplications();
-            }
+        window.approveUser = async (uid) => {
+            if (!confirm("Approve this user?")) return;
+            await updateDoc(doc(db, USERS_COLLECTION, uid), { status: 'approved', approvedAt: serverTimestamp() });
+            loadApplications(); loadAccounts();
+        }
+        window.rejectUser = async (uid) => {
+            if (!confirm("Reject this user?")) return;
+            await updateDoc(doc(db, USERS_COLLECTION, uid), { status: 'rejected', rejectedAt: serverTimestamp() });
+            loadApplications();
+        }
 
-            // 3. Accounts
-            async function loadAccounts() {
-                const tbody = document.getElementById('account-list-body');
-                tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
-                try {
-                    const q = query(collection(db, USERS_COLLECTION), orderBy("appliedAt", "desc"));
-                    const snap = await getDocs(q);
-                    tbody.innerHTML = '';
+        // 3. Accounts
+        async function loadAccounts() {
+            const tbody = document.getElementById('account-list-body');
+            tbody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+            try {
+                const q = query(collection(db, USERS_COLLECTION), orderBy("appliedAt", "desc"));
+                const snap = await getDocs(q);
+                tbody.innerHTML = '';
 
-                    snap.forEach(docSnap => {
-                        const data = docSnap.data();
-                        const tr = document.createElement('tr');
-                        const statusClass = data.status === 'approved' ? 'approved' : (data.status === 'rejected' ? 'rejected' : 'pending');
-                        const isAdmin = data.roles && data.roles.admin;
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const tr = document.createElement('tr');
+                    const statusClass = data.status === 'approved' ? 'approved' : (data.status === 'rejected' ? 'rejected' : 'pending');
+                    const isAdmin = data.roles && data.roles.admin;
 
-                        tr.innerHTML = `
+                    tr.innerHTML = `
                         <td>
                             <div style="font-weight:bold;">${data.name || data.email}</div>
                             <div style="font-size:11px; color:#999;">${data.email}</div>
@@ -704,63 +710,63 @@
                             <button class="btn-action btn-danger" onclick="deleteUser('${docSnap.id}')">Delete</button>
                         </td>
                      `;
-                        tbody.appendChild(tr);
-                    });
-                } catch (e) { console.error(e); }
-            }
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); }
+        }
 
-            window.toggleAdmin = async (uid, isChecked) => {
-                try {
-                    await updateDoc(doc(db, USERS_COLLECTION, uid), { "roles.admin": isChecked });
-                    // If update self, reload to reflect permissions
-                    if (uid === currentUser.uid && !isChecked) {
-                        alert("You have demoted yourself. Reloading...");
-                        window.location.reload();
-                    }
-                } catch (e) {
-                    alert("Error updating role: " + e.message);
-                    loadAccounts(); // revert UI on error
+        window.toggleAdmin = async (uid, isChecked) => {
+            try {
+                await updateDoc(doc(db, USERS_COLLECTION, uid), { "roles.admin": isChecked });
+                // If update self, reload to reflect permissions
+                if (uid === currentUser.uid && !isChecked) {
+                    alert("You have demoted yourself. Reloading...");
+                    window.location.reload();
                 }
-            };
-
-            window.deleteUser = async (uid) => {
-                if (!confirm("Permanently delete?")) return;
-                await deleteDoc(doc(db, USERS_COLLECTION, uid));
-                loadAccounts();
+            } catch (e) {
+                alert("Error updating role: " + e.message);
+                loadAccounts(); // revert UI on error
             }
+        };
 
-            // 4. History
-            async function loadHistory() {
-                const list = document.getElementById('log-list');
-                const q = query(collection(db, LOGS_COLLECTION), orderBy("timestamp", "desc"), limit(50));
-                const snap = await getDocs(q);
-                list.innerHTML = renderLogTable(snap);
-            }
+        window.deleteUser = async (uid) => {
+            if (!confirm("Permanently delete?")) return;
+            await deleteDoc(doc(db, USERS_COLLECTION, uid));
+            loadAccounts();
+        }
 
-            // 5. User Detail
-            window.openUserDetail = (uid) => {
-                switchView('view-user-detail');
-                loadUserDetail(uid);
-            };
+        // 4. History
+        async function loadHistory() {
+            const list = document.getElementById('log-list');
+            const q = query(collection(db, LOGS_COLLECTION), orderBy("timestamp", "desc"), limit(50));
+            const snap = await getDocs(q);
+            list.innerHTML = renderLogTable(snap);
+        }
 
-            async function loadUserDetail(uid) {
-                const infoPanel = document.getElementById('user-info-panel');
-                const logList = document.getElementById('user-log-list');
+        // 5. User Detail
+        window.openUserDetail = (uid) => {
+            switchView('view-user-detail');
+            loadUserDetail(uid);
+        };
 
-                infoPanel.innerHTML = 'Loading info...';
-                logList.innerHTML = 'Loading logs...';
+        async function loadUserDetail(uid) {
+            const infoPanel = document.getElementById('user-info-panel');
+            const logList = document.getElementById('user-log-list');
 
-                try {
-                    // Get User Info
-                    const userDoc = await getDoc(doc(db, USERS_COLLECTION, uid));
-                    if (!userDoc.exists()) {
-                        infoPanel.innerHTML = '<span style="color:red">User not found.</span>';
-                        return;
-                    }
-                    const data = userDoc.data();
-                    const appliedAt = data.appliedAt ? new Date(data.appliedAt.toDate()).toLocaleString() : "-";
+            infoPanel.innerHTML = 'Loading info...';
+            logList.innerHTML = 'Loading logs...';
 
-                    infoPanel.innerHTML = `
+            try {
+                // Get User Info
+                const userDoc = await getDoc(doc(db, USERS_COLLECTION, uid));
+                if (!userDoc.exists()) {
+                    infoPanel.innerHTML = '<span style="color:red">User not found.</span>';
+                    return;
+                }
+                const data = userDoc.data();
+                const appliedAt = data.appliedAt ? new Date(data.appliedAt.toDate()).toLocaleString() : "-";
+
+                infoPanel.innerHTML = `
                     <div class="detail-grid">
                         <span class="detail-label">Name:</span> <span class="detail-val" style="font-size:16px;">${data.name || '-'}</span>
                         <span class="detail-label">Email:</span> <span class="detail-val">${data.email}</span>
@@ -778,38 +784,38 @@
                     </div>
                 `;
 
-                    // Get User Logs
-                    const qLogs = query(collection(db, LOGS_COLLECTION), where("user", "==", data.email), orderBy("timestamp", "desc"), limit(50));
-                    const snapLogs = await getDocs(qLogs);
-                    if (snapLogs.empty) {
-                        logList.innerHTML = '<div style="padding:20px; color:#999; text-align:center;">No activity logs found for this user.</div>';
-                    } else {
-                        logList.innerHTML = renderLogTable(snapLogs);
-                    }
-
-                } catch (e) {
-                    console.error(e);
-                    infoPanel.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+                // Get User Logs
+                const qLogs = query(collection(db, LOGS_COLLECTION), where("user", "==", data.email), orderBy("timestamp", "desc"), limit(50));
+                const snapLogs = await getDocs(qLogs);
+                if (snapLogs.empty) {
+                    logList.innerHTML = '<div style="padding:20px; color:#999; text-align:center;">No activity logs found for this user.</div>';
+                } else {
+                    logList.innerHTML = renderLogTable(snapLogs);
                 }
-            }
 
-            // Log Table Helper
-            function renderLogTable(snap) {
-                let html = '<table style="width:100%">';
-                snap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : '-';
-                    html += `
+            } catch (e) {
+                console.error(e);
+                infoPanel.innerHTML = `<span style="color:red">Error: ${e.message}</span>`;
+            }
+        }
+
+        // Log Table Helper
+        function renderLogTable(snap) {
+            let html = '<table style="width:100%">';
+            snap.forEach(docSnap => {
+                const data = docSnap.data();
+                const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : '-';
+                html += `
                         <tr style="border-bottom:1px solid #eee;">
                             <td style="width:150px; font-size:11px; color:#999;">${date}</td>
                             <td style="width:100px; font-weight:bold; color:#0061ff;">${data.action}</td>
                             <td>${data.details}</td>
                         </tr>
                     `;
-                });
-                html += '</table>';
-                return html;
-            }
+            });
+            html += '</table>';
+            return html;
+        }
 
     </script>
 </body>
